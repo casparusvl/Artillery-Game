@@ -122,7 +122,8 @@ async def main():
         #clock.tick(tickrate)
         #time = pygame.time.get_ticks()
         #Player.active = turn % len(Player.list)
-        Player.active = player_list[turn % len(Player.list)]
+        Player.active = Player.list[turn % len(Player.list)]
+        print(Player.active)
 
         # Get mouse position 
         mouse_pos = pygame.mouse.get_pos()
@@ -262,7 +263,6 @@ async def main():
 class State:
     state = {'menu' : 1, 'title_menu' : 1, 'main_menu' : 0, 'pause_menu': 0, 'end_menu' : 0, 'gameplay' : 0}
 
-
 # world class generates .ground(np.array) on initiation
 # .ground
 class World:
@@ -316,7 +316,7 @@ class Player:
     # Class variables
     count = 0
     list = []
-    active = 1
+    active = None
 
     
     def __init__(self, name=None, color=False):
@@ -335,7 +335,7 @@ class Player:
         else:
             self.sprite = pygame.image.load("assets/tank_pink.png").convert_alpha()
             self.cannon_angle = 5
-        Player.list.append((self.name))
+        Player.list.append(self)
         
         
     
