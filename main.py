@@ -5,7 +5,6 @@ import math
 import numpy as np
 import sys
 import pygame
-#from cfg import *
 import string
 
 
@@ -21,10 +20,10 @@ iterations = 4
 hres = 1280
 vres = 720
 
-tickrate = 120
-gravity = -9.81
-input_scale = 700 / hres
-time_scale = hres / 200
+tickrate = 60
+gravity = -10
+input_scale = 700 / hres #0.5
+time_scale = hres / 200 #7
 
 screen_color = (0, 0, 0)
 ground_color = (255, 0, 0)
@@ -57,20 +56,7 @@ font_small = pygame.font.Font('freesansbold.ttf', 16)
 
 
 
-
-
-
-
-
-
-
 #pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
-
-
-
-
-    
-    
 
 ###################################################################################
 
@@ -90,8 +76,8 @@ async def main():
     #p1.gen_pos(world.ground)
     p2 = Player()
     #p2.gen_pos(world.ground)
-    print('Players:', Player.count, Player.list)
-    player_list = [p1, p2]
+    print(Player.count, f"Players: {Player.list[0].name}, {Player.list[1].name};")
+
 
     # Start game with score 0
     score = 0
@@ -104,26 +90,26 @@ async def main():
     init_new = True
     hit = p1_hit = p2_hit = False
     reset_score = False
-    main_count = 0
+    cursor_count = 0
     turn = 0
 
     kaboom = 0
-    kaboomfactor = 7
+    kaboomfactor = 0
 
     # Load cannon sprite
-    cannon_sprite = pygame.image.load("assets/cannon.png").convert_alpha()
+    cannon_sprite = pygame.image.load("img/cannon.png").convert_alpha()
 
 
     #################################################################################################3
     
     # Game loop
     while True :
-        clock.tick_busy_loop(tickrate)
-        #clock.tick(tickrate)
+        clock.tick(tickrate)
+        #clock.tick_busy_loop(tickrate)
         #time = pygame.time.get_ticks()
         #Player.active = turn % len(Player.list)
         Player.active = Player.list[turn % len(Player.list)]
-        print(Player.active)
+
 
         # Get mouse position 
         mouse_pos = pygame.mouse.get_pos()
@@ -131,22 +117,24 @@ async def main():
 
         # Game menu loop
         while State.state['menu'] == 1 :
-            # Make cursor blink Main.cursor value (0 or 1)
-            clock.tick_busy_loop(tickrate)
-            main_count += 1
-            if main_count >= 2 * tickrate :
-                main_count = 0
-            Menu.cursor = main_count // tickrate
+            # Make cursor blink setup.cursor value (0 or 1)
+            clock.tick(tickrate)
+            #clock.tick_busy_loop(tickrate)
+            cursor_count += 1
+            if cursor_count >= 2 * tickrate :
+                cursor_count = 0
+            Menu.cursor = cursor_count // tickrate
 
             if State.state['title_menu'] == 1 :
                 Menu.title(screen)
                 # Go title menu
-            if State.state['main_menu'] == 1 :
-                Menu.main(screen, p1, p2)
+            if State.state['setup_menu'] == 1 :
+                Menu.setup(screen, p1, p2)
                 # go pause menu
             if State.state['end_menu'] == 1 :
                 pass
                 # go end menu
+            await asyncio.sleep(0)
 
         # Event loop
         for event in pygame.event.get() :
@@ -163,11 +151,14 @@ async def main():
                 if event.type == pygame.MOUSEBUTTONDOWN :
                     mouse_presses = pygame.mouse.get_pressed()
                     if mouse_presses[0]:
-                        print(mouse_pos)
+                        print(f"vX/Y: {mouse_pos},   Angle: {Player.active.cannon_angle}")
                         kaboom = 0
-                        kaboomfactor = 7    # Hit explosion speed factor 
-                        velocity = [input_scale* (mouse_pos[0] - Player.active.pos[0]), 
-                            input_scale * (mouse_pos[1] - Player.active.pos[1])]
+                        if tickrate < 100:
+                            kaboomfactor = 12
+                        else:
+                            kaboomfactor = 7    # Hit explosion speed factor 
+                        velocity = [input_scale *(mouse_pos[0] - Player.active.pos[0]),
+                                    input_scale * (mouse_pos[1] - Player.active.pos[1])]
                         projectile.launch(Player.active.pos, velocity)
 
             # Exit game on close windows button
@@ -199,8 +190,6 @@ async def main():
                 if projectile.check_hit(p2.pos) :
                     p1.add_score()
                     hit = p2_hit = True
-                #print('flight:', projectile.inflight, ' Hit1:', p1_hit, p2_hit)
-
 
 
 
@@ -253,7 +242,7 @@ async def main():
 
         # Flip framebuffer
         pygame.display.flip()
-    await asyncio.sleep(0)
+        await asyncio.sleep(0)
 
 
 
@@ -261,7 +250,7 @@ async def main():
 # Game classes.
 # Game State counters 
 class State:
-    state = {'menu' : 1, 'title_menu' : 1, 'main_menu' : 0, 'pause_menu': 0, 'end_menu' : 0, 'gameplay' : 0}
+    state = {'menu' : 1, 'title_menu' : 1, 'setup_menu' : 0, 'pause_menu': 0, 'end_menu' : 0, 'gameplay' : 0}
 
 # world class generates .ground(np.array) on initiation
 # .ground
@@ -327,13 +316,13 @@ class Player:
         self.name = str(name) if name else 'Player {}'.format(self.nr)
         self.score = 0
         if self.nr == 1:
-            self.sprite = pygame.image.load("assets/tank_blue.png").convert_alpha()
+            self.sprite = pygame.image.load("img/tank_blue.png").convert_alpha()
             self.cannon_angle = 5
         elif self.nr == 2:
-            self.sprite = pygame.transform.flip(pygame.image.load("assets/tank_green.png").convert_alpha(), True, False)
+            self.sprite = pygame.transform.flip(pygame.image.load("img/tank_green.png").convert_alpha(), True, False)
             self.cannon_angle = 175
         else:
-            self.sprite = pygame.image.load("assets/tank_pink.png").convert_alpha()
+            self.sprite = pygame.image.load("img/tank_pink.png").convert_alpha()
             self.cannon_angle = 5
         Player.list.append(self)
         
@@ -437,7 +426,6 @@ class Projectile:
             col_list = self.pos # Calculate exact collision coordinate
             pos1 = self.trajectory[-2]
             pos2 = self.pos
-            #print('A', pos2, pos1)
             slope_pos = (pos2[1] - pos1[1]) / (pos2[0] - pos1[0])
             const = pos1[1] - (pos1[0] * slope_pos)
             l = []
@@ -458,11 +446,8 @@ class Projectile:
             if len(l) < 2 :
                 self.crater = self.pos
             else :
-                #print('L: ', l)
                 for i in l :
-                    #print('i: ', i, 'ground: ', self.ground[i[0]])
                     if i[1] > self.ground[i[0]][1] :                        
-                        #col_pos = copy.deepcopy(self.ground[i[0]])
                         self.crater = i
                         break
                         
@@ -530,9 +515,12 @@ class Projectile:
 
 
 class Menu :
-    cursor = 0
-    name = ''
-
+    playerselect = 1
+    count = 0
+    p1name = ''
+    p2name = ''
+    cursor = 1
+  
     @classmethod
     def typing(cls, char) :
         alfabet = string.ascii_letters
@@ -541,7 +529,7 @@ class Menu :
             char = char - 97
             char = alfabet[char + cap * 26]
         #elif char == 32 :
-            #char = ' '
+        #    char = ' '
         else :
             char = ''
         return char
@@ -554,15 +542,15 @@ class Menu :
         for event in pygame.event.get() :
             # Key event    
             if event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_SPACE :
-                    State.state['main_menu'] = 1
+                if event.key == pygame.K_RETURN :
+                    State.state['setup_menu'] = 1
                     State.state['title_menu'] = 0
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN :
                 mouse_presses = pygame.mouse.get_pressed()
                 if mouse_presses[0]:
-                    State.state['main_menu'] = 1
+                    State.state['setup_menu'] = 1
                     State.state['title_menu'] = 0
 
         string = 'Tank duel'
@@ -585,35 +573,68 @@ class Menu :
         textrect.bottomright = (hres - 10, vres -10)
         surface.blit(text, textrect)
 
-        
         pygame.display.flip() 
  
-    @classmethod
-    def main(cls, surface, p1, p2) :   # Draw Main screen
-        #init_new
 
-        i = 0
+    @classmethod
+    def setup(cls, surface, p1, p2) :   # Draw setup screen
+        
         pygame.Surface.fill(screen, (0, 0, 0)) 
         
-        for event in pygame.event.get() :
-            # Key event    
-            if event.type == pygame.KEYDOWN :
-                if event.key == 8 :
-                    cls.name = cls.name[:-1]
-                else :
-                    char = event.unicode
-                    char = char.strip()
-                    cls.name = cls.name + char
-                    cls.name = cls.name[:10]
+        if cls.playerselect == 1:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                # Key event    
+                if event.type == pygame.KEYDOWN :
+                    # If backspace
+                    if event.key == 8 :
+                        cls.p1name = cls.p1name[:-1]
+                    # If space
+                    elif event.key == 32:
+                        cls.p1name = cls.p1name + ' '
+                        cls.p1name = cls.p1name[:10]
+                    # If unicode
+                    else :
+                        char = event.unicode
+                        char = char.strip()
+                        cls.p1name = cls.p1name + char
+                        cls.p1name = cls.p1name[:10]
+                    # When press ENTER: Set P1 name if typed name != empty
+                    # and change selector to p2
+                    if event.key == pygame.K_RETURN:
+                        if cls.p1name:
+                            p1.name = cls.p1name
+                        cls.playerselect = 2
             
-            if event.type == pygame.QUIT:
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN :
-                mouse_presses = pygame.mouse.get_pressed()
-                if mouse_presses[0]:
-                    State.state['menu'] = 0
-                    State.state['main_menu'] = 0
-                    init_new = True
+                 
+        elif cls.playerselect == 2:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                # Key event    
+                if event.type == pygame.KEYDOWN :
+                    if event.key == 8 :
+                        cls.p2name = cls.p2name[:-1]
+                        # If space
+                    elif event.key == 32:
+                        cls.p1name = cls.p1name + ' '
+                        cls.p1name = cls.p1name[:10]
+                    else :
+                        char = event.unicode
+                        char = char.strip()
+                        cls.p2name = cls.p2name + char
+                        cls.p2name = cls.p2name[:10]
+                    # When press ENTER: Set P1 name if typed name != empty
+                    # exit menu and change selector back to p1
+                    if event.key == pygame.K_RETURN:
+                        if cls.p2name:
+                            p2.name = cls.p2name
+                        cls.playerselect = 1
+                        State.state['menu'] = 0
+                        State.state['setup_menu'] = 0
+                        init_new = True
+        
         
         # Title line
         string = 'Name'
@@ -635,14 +656,14 @@ class Menu :
         text = font2.render(string, True, p1.color, (0,0,0))
         text2rect = text.get_rect()
         text2rect.left = hres // 8
-        text2rect.top = textrect.bottom + 10
+        text2rect.top = textrect.bottom + 20
         surface.blit(text, text2rect)
         
-        string = cls.name[:10] + '_' * cls.cursor
+        string = cls.p1name[:10] + '_' * cls.cursor if cls.playerselect == 1 else cls.p1name[:10]
         text = font2.render(string, True, p1.color, (0,0,0))
         text2rect = text.get_rect()
         text2rect.left = hres * 3 // 8
-        text2rect.top = textrect.bottom + 10
+        text2rect.top = textrect.bottom + 20
         surface.blit(text, text2rect)
 
         # Player 2 line
@@ -650,14 +671,14 @@ class Menu :
         text = font2.render(string, True, p2.color, (0,0,0))
         text3rect = text.get_rect()
         text3rect.left = hres // 8
-        text3rect.top = text2rect.bottom + 10
+        text3rect.top = text2rect.top + 60
         surface.blit(text, text3rect)
         
-        string = cls.name[:10] + '_' * cls.cursor
+        string = cls.p2name[:10] + '_' * cls.cursor if cls.playerselect == 2 else cls.p2name[:10]
         text = font2.render(string, True, p2.color, (0,0,0))
         text3rect = text.get_rect()
         text3rect.left = hres * 3 // 8
-        text3rect.top = text2rect.bottom + 10
+        text3rect.top = text2rect.top + 60
         surface.blit(text, text3rect)
 
         pygame.display.flip() 
