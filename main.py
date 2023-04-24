@@ -567,7 +567,7 @@ class Menu :
         text2rect.top = textrect.bottom + 5
         surface.blit(text, text2rect)
         
-        string = '2023, by Kasper Vloon'
+        string = '2023' #', by Kasper Vloon'
         text = font_small.render(string, True, (100, 100, 100), (0,0,0))
         textrect = text.get_rect()
         textrect.bottomright = (hres - 10, vres -10)
