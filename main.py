@@ -238,7 +238,7 @@ async def main():
 
         # Draw score and framerate overlays
         draw_score(screen, p1, p2)
-        draw_fps(screen, show_frame_time=False)
+        # draw_fps(screen, show_frame_time=False)
 
         # Flip framebuffer
         pygame.display.flip()
@@ -644,7 +644,7 @@ class Menu :
         textrect.bottom = vres // 6
         surface.blit(text, textrect)
 
-        string = 'Color'
+        string = '' #'Color'
         text = font2.render(string, True, (255,0 ,0), (0,0,0))
         textrect = text.get_rect()
         textrect.left = hres * 5 // 8
