@@ -20,7 +20,7 @@ iterations = 4
 hres = 1280
 vres = 720
 
-tickrate = 60
+tickrate = 120
 gravity = -10
 input_scale = 700 / hres #0.5
 time_scale = hres / 200 #7
@@ -64,7 +64,7 @@ font_small = pygame.font.Font('freesansbold.ttf', 16)
  
 # Main function
 async def main():
-#def main():
+# def main():
 
     # Global variables (need to improve this)
     ###########################################################################################################
@@ -238,7 +238,7 @@ async def main():
 
         # Draw score and framerate overlays
         draw_score(screen, p1, p2)
-        # draw_fps(screen, show_frame_time=False)
+        draw_fps(screen, show_frame_time=False)
 
         # Flip framebuffer
         pygame.display.flip()
@@ -768,4 +768,4 @@ def _check_hit(crater, target_pos, blast_size=25) :    # Calculate if player hit
 asyncio.run(main())
 
 #if __name__ == "__main__":
- #   main()
+#   main()
