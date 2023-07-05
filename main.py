@@ -9,7 +9,7 @@ import numpy as np
 import pygame
 
 
-# Global variables
+# Global constants
 ###################################################################################
 
 # field generator setup
@@ -28,18 +28,19 @@ screen_color = (0, 0, 0)
 ground_color = (255, 0, 0)
 projectile_color = (25, 25, 25)
 
+# Player generator setup
+default_color = ((0, 0, 255), (86, 130, 3),(255, 0, 0))
+p1color = (0, 0, 255)
+p2color = (86, 130, 0)
+player_list = []
+
+# Global variables
 # Setup fps counter
 frame_count = 0
 frame_time_count = 0
 frame_time_avg = '0'
 fps_avg = '0'
 update_interval = tickrate // 2
-
-# Player generator setup
-default_color = ((0, 0, 255), (86, 130, 3),(255, 0, 0))
-p1color = (0, 0, 255)
-p2color = (86, 130, 0)
-player_list = []
 
 # Init Pygame
 pygame.init()
