@@ -2,12 +2,11 @@ import asyncio
 from random import randint
 import copy
 import math
-import numpy as np
 import sys
-import pygame
 import string
 
-
+import numpy as np
+import pygame
 
 
 # Global variables
@@ -55,13 +54,11 @@ font_fps = pygame.font.Font('freesansbold.ttf', 16)
 font_small = pygame.font.Font('freesansbold.ttf', 16)
 
 
-
 #pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
 
 ###################################################################################
 
 
- 
 # Main function
 async def main():
 # def main():
@@ -85,7 +82,6 @@ async def main():
     crater_color = (255, 240, 0)
     blastsize = 27
     
-
 
     init_new = True
     hit = p1_hit = p2_hit = False
@@ -247,6 +243,9 @@ async def main():
 ################################################################################################################################
 
 
+
+
+
 # Game classes.
 # Game State counters 
 class State:
@@ -325,8 +324,7 @@ class Player:
             self.sprite = pygame.image.load("img/tank_pink.png").convert_alpha()
             self.cannon_angle = 5
         Player.list.append(self)
-        
-        
+
     
     def __str__(self):
         return 'Player nr: {}\nName: {}\nPosition: {}\nColor: {}'.format(self.nr, self.name, self.pos, self.color)
@@ -534,6 +532,7 @@ class Menu :
             char = ''
         return char
 
+
     @classmethod 
     def title(cls, surface) :   # Draw Title screen 
         global init_new
@@ -703,7 +702,6 @@ def draw_fps(surface, interval=update_interval, show_frame_time=False) :   # Cal
         frame_count = 0
         frame_time_count = 0
     
-    
     if show_frame_time == False :
         text = font_fps.render(fps_avg, True, (0, 255, 0), (0,0,0))
     else :
@@ -760,8 +758,6 @@ def _check_hit(crater, target_pos, blast_size=25) :    # Calculate if player hit
         return True
     else :
         return False
-
-
 
 
 
