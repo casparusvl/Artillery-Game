@@ -22,7 +22,7 @@ VRES = 720
 TICKRATE = 120
 GRAVITY = -10
 INPUT_SCALE = 700 / HRES #0.5
-INPUT_SCALE = HRES / 200 #7
+TIME_SCALE = HRES / 200 #7
 
 #screen_color = (0, 0, 0)
 GROUND_COLOR = (255, 0, 0)
@@ -421,17 +421,16 @@ class Projectile:
         '''
         Increment projectile position by one timestep.
         '''
-        if not self.collision:
-            dt = INPUT_SCALE / TICKRATE
-            print(dt)
-            position = copy.deepcopy(self.pos)
-            velocity = copy.deepcopy(self.velocity)
-            position[0] = position[0] + velocity[0] * dt
-            position[1] = position[1] + velocity[1] * dt
-            velocity[1] = velocity[1] - GRAVITY * dt
-            self.pos = position
-            self.velocity = velocity
-            self.trajectory.append(position)
+        #if not self.collision:
+        dt = TIME_SCALE / TICKRATE
+        position = copy.deepcopy(self.pos)
+        velocity = copy.deepcopy(self.velocity)
+        position[0] = position[0] + velocity[0] * dt
+        position[1] = position[1] + velocity[1] * dt
+        velocity[1] = velocity[1] - GRAVITY * dt
+        self.pos = position
+        self.velocity = velocity
+        self.trajectory.append(position)
     
 
     def check_collision(self, world):
