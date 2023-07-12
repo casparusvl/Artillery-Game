@@ -1,9 +1,9 @@
 import asyncio
-from random import randint
 import copy
 import math
-import sys
+from random import randint
 import string
+import sys
 
 import numpy as np
 import pygame
@@ -21,7 +21,7 @@ HRES = 1280
 VRES = 720
 
 # Game engine settings
-TICKRATE = 60
+TICKRATE = 60   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
 GRAVITY = -10
 INPUT_SCALE = 700 / HRES #0.5
 TIME_SCALE = HRES / 200 #7
@@ -449,7 +449,8 @@ class Projectile:
             #print("y:", (pos2[1] - pos1[1]), " X:", (pos2[0] - pos1[0]))
             #print("Slope:", slope_pos)
             
-            # Some magic intepolation to get more accurate collision position
+            # Some magic intepolation to get more accurate collision position.
+            # This is a mess, but it works
             const = pos1[1] - (pos1[0] * slope_pos)
             l = []
             i = 0
@@ -573,10 +574,6 @@ class Blast:
             State.init_new = True
 
     
-
-
-
-
 
 class Menu :
     playerselect = 1
