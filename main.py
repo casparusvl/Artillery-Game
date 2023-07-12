@@ -16,13 +16,24 @@ import pygame
 MINSAMPLES = 5
 ITERATIONS = 4
 
+# Screen resolution
 HRES = 1280
 VRES = 720
 
+# Game engine settings
 TICKRATE = 120
 GRAVITY = -10
 INPUT_SCALE = 700 / HRES #0.5
 TIME_SCALE = HRES / 200 #7
+
+# Setting for hit animation
+if TICKRATE < 100:
+    KABOOMCONSTANT = 12
+else:
+    KABOOMCONSTANT = 7    # Hit explosion speed factor
+
+CRATER_COLOR = (255, 240, 0)
+BLASTSIZE = 27
 
 #screen_color = (0, 0, 0)
 GROUND_COLOR = (255, 0, 0)
@@ -46,6 +57,7 @@ font_fps = pygame.font.Font('freesansbold.ttf', 16)
 font_small = pygame.font.Font('freesansbold.ttf', 16)
 
 #pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
+#state = {'menu' : 1, 'title_menu' : 1, 'setup_menu' : 0, 'pause_menu': 0, 'end_menu' : 0,}
 
 ###################################################################################
 
@@ -54,34 +66,17 @@ async def main():
 
     # Global variables (need to improve this)
     ###########################################################################################################
-    fps = Frame_counter()
+    
 
     # Initialise game objects
+    fps = Frame_counter()
     world = World()
     projectile = Projectile()
     p1 = Player()
     p2 = Player()
     print(Player.count, f"Players: {Player.list[0].name}, {Player.list[1].name};")
 
-
-    # Start game with score 0
-    score = 0
-
-    crater_color = (255, 240, 0)
-    blastsize = 27
-    
-
-    init_new = True
-    hit = p1_hit = p2_hit = False
-    reset_score = False
     cursor_count = 0
-    turn = 0
-
-    kaboom = 0
-    kaboomfactor = 0
-
-    # Load cannon sprite
-    cannon_sprite = pygame.image.load("img/cannon.png").convert_alpha()
 
 
     #################################################################################################3
@@ -91,57 +86,49 @@ async def main():
         clock.tick(TICKRATE)
         #clock.tick_busy_loop(TICKRATE)
         #time = pygame.time.get_ticks()
-        #Player.active = turn % len(Player.list)
-        Player.active = Player.list[turn % len(Player.list)]
+        Player.active = Player.list[State.turn % len(Player.list)]
 
         # Get mouse position 
         mouse_pos = pygame.mouse.get_pos()
         
         # Menu loop
-        while State.state['menu'] == 1 :
-            # Make cursor blink setup.cursor value (0 or 1)
+        while State.menu == True:
             clock.tick(TICKRATE)
-            #clock.tick_busy_loop(TICKRATE)
-            cursor_count += 1
-            if cursor_count >= 2 * TICKRATE :
-                cursor_count = 0
-            Menu.cursor = cursor_count // TICKRATE
+            Menu.cursor_blink()
 
-            if State.state['title_menu'] == 1 :
+            # Select correct menu screen
+            if State.title_menu == True :
                 Menu.title(screen)
-                # Go title menu
-            if State.state['setup_menu'] == 1 :
+            if State.setup_menu == True :
                 Menu.setup(screen, p1, p2)
-                # go pause menu
-            if State.state['end_menu'] == 1 :
-                pass
-                # go end menu
+            if State.end_menu == True :
+                # implement endscreen
+                State.end_menu = False
+            #else:
+                #State.menu = False
+                
             await asyncio.sleep(0)
 
         # Events
         for event in pygame.event.get() :
-            # Key event    
-
-            if event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_n :
-                    init_new = True
-                    reset_score = True
-
+            
+            # Key event
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_n:
+                    State.init_new = True
+                    State.reset_score = True
+                
+                if event.key == pygame.K_ESCAPE:
+                    State.menu = True
+                    State.setup_menu = True
 
             # Mousebutton event (launch projectile
-            if projectile.inflight == False and hit == False :
+            if projectile.inflight == False and projectile.hit == False :
                 if event.type == pygame.MOUSEBUTTONDOWN :
                     mouse_presses = pygame.mouse.get_pressed()
                     if mouse_presses[0]:
-                        print(f"vX/Y: {mouse_pos},   Angle: {Player.active.cannon_angle}")
-                        kaboom = 0
-                        if TICKRATE < 100:
-                            kaboomfactor = 12
-                        else:
-                            kaboomfactor = 7    # Hit explosion speed factor 
-                        velocity = [INPUT_SCALE * (mouse_pos[0] - Player.active.pos[0]),
-                                    INPUT_SCALE * (mouse_pos[1] - Player.active.pos[1])]
-                        projectile.launch(Player.active.pos, velocity)
+                        print(f"FIRE AWAY!\nVelocity X/Y: {mouse_pos},   Angle: {Player.active.cannon_angle}")
+                        projectile.launch(Player.active, mouse_pos)
 
             # Exit game on close windows button
             if event.type == pygame.QUIT:
@@ -149,30 +136,37 @@ async def main():
 
 
         # Game logic
-        if init_new == True :    # Initiate new turn
+        if State.init_new == True :    # Initiate new turn
             world.generate()
             p1.gen_pos(world)
             p2.gen_pos(world)
             projectile.reset()
-            if reset_score == True :
+            projectile.hit = p1.hit = p2.hit = False
+            Blast.reset()
+            State.init_new = False
+            if State.reset_score == True :
                 p1.score = p2.score = 0
-                reset_score = False
-            hit = p1_hit = p2_hit = False
-            init_new = False
+                State.reset_score = False
+            
 
         # Calculate projectile flight and collision, hit detect.        
-        if projectile.inflight == True :                     # Increment if in flight.
+        if projectile.inflight == True :                # Increment if in flight.
             projectile.increment()
             projectile.check_collision(world)
-            if projectile.inflight == False :               # if inflight==False after increment, shot has finished
-                turn += 1
-            if projectile.collision == True :               # Calculate crater position and hit detection
-                if projectile.check_hit(p1.pos) :           # Increment player score on hit
-                    p2.increase_score()
-                    hit = p1_hit = True
-                if projectile.check_hit(p2.pos) :
+            if projectile.inflight == False:
+                # Projectile is not inflight anymore, so turn is over
+                State.turn += 1
+            if projectile.collision == True:    
+                # In case projectile has had a collision.
+                # Do hit detection on both players and increment score on player hit
+                if projectile.check_hit(p1.pos):
+                    print(f"{p1.name} was hit!")
+                    p2.increase_score()                 
+                    projectile.hit = p1.hit = True
+                if projectile.check_hit(p2.pos):
+                    print(f"{p2.name} was hit!")
                     p1.increase_score()
-                    hit = p2_hit = True
+                    projectile.hit = p2.hit = True
 
 
 
@@ -189,8 +183,8 @@ async def main():
         Player.active.set_cannon_angle(mouse_pos)
 
         # Draw cannon sprites
-        draw_cannon(cannon_sprite, p1)
-        draw_cannon(cannon_sprite, p2)
+        draw_cannon(p1)
+        draw_cannon(p2)
 
         # Draw player sprites
         screen.blit(p1.sprite, (p1.pos[0] - 35, p1.pos[1] - 28))
@@ -201,20 +195,15 @@ async def main():
         #pygame.draw.circle(screen, p2.color, p2.pos, radius=8)    
         
         # Draw explosions in case of projectile collision with ground
-        if projectile.collision == True :
-            if kaboom < blastsize :
-                kaboom += 2
-                pygame.draw.circle(screen, crater_color, projectile.crater, radius=kaboom)
-            else :
-                pygame.draw.circle(screen, crater_color, projectile.crater, radius=blastsize)
+        if projectile.collision == True:
+            Blast.small(projectile.crater, BLASTSIZE)
+
 
         # Draw hit animation if player is hit
-        if hit :
-            kaboom += kaboomfactor
-            kaboomfactor *= 0.997
-            pygame.draw.circle(screen, crater_color, projectile.crater, radius=kaboom)
-            if kaboom > HRES :
-                init_new = True
+        
+        if projectile.hit == True:
+            Blast.big(projectile.crater)
+
 
         # Draw score and framerate overlays
         draw_score(screen, p1, p2)
@@ -234,11 +223,21 @@ async def main():
 
 
 # Game classes.
+
 class State:
     '''
-    Keeps game state
+    Stores global game state
     '''
-    state = {'menu' : 1, 'title_menu' : 1, 'setup_menu' : 0, 'pause_menu': 0, 'end_menu' : 0, 'gameplay' : 0}
+    menu = True
+    title_menu = True
+    setup_menu = False
+    pause_menu = False
+    end_menu = False
+
+    init_new = True
+    reset_score = False
+    turn = 0
+
 
 class World:
     '''
@@ -312,7 +311,9 @@ class Player:
         self.name = str(name) if name else f"Player {self.nr}"
         self.score = 0
         self.set_sprite()
+        self.hit = False
         Player.list.append(self)
+        
 
     def __str__(self):
         return 'Player nr: {}\nName: {}\nPosition: {}\nColor: {}'.format(self.nr, self.name, self.pos, self.color)
@@ -371,14 +372,18 @@ class Player:
         '''
         if self.nr == 1:
             self.sprite = pygame.image.load("img/tank_blue.png").convert_alpha()
+            self.cannon_sprite = pygame.image.load("img/cannon.png").convert_alpha()
             self.cannon_angle = 5
         elif self.nr == 2:
             self.sprite = pygame.transform.flip(pygame.image.load("img/tank_green.png").convert_alpha(), True, False)
+            self.cannon_sprite = pygame.image.load("img/cannon.png").convert_alpha()
             self.cannon_angle = 175
         else:
             self.sprite = pygame.image.load("img/tank_pink.png").convert_alpha()
+            self.cannon_sprite = pygame.image.load("img/cannon.png").convert_alpha()
             self.cannon_angle = 5
         
+
 
 class Projectile:
     '''
@@ -391,40 +396,40 @@ class Projectile:
 
     def reset(self):
         '''
-        Reset projectile parameters to be ready for new launch
+        Reset projectile parameters
         '''
         self.inflight = False
         self.collision = False
         self.hit = False
         self.color = PROJECTILE_COLOR
-        ## self.pos = 0
+        self.pos = []
         self.velocity = []
         self.trajectory = []
         self.crater = []
 
 
-    def launch(self, start_pos, start_velocity):
+    def launch(self, player, mouse_pos):#, start_velocity):
         '''
-        Fires projectile
+        Calculates velocity from relative mouse position and fires projectile
         '''
-        self.inflight = False
+        self.crater = []
+        self.inflight = True
         self.collision = False
         self.hit = False
-        self.pos = copy.deepcopy(start_pos)
+        self.pos = copy.copy(player.pos)
         self.pos[1] = self.pos[1] - 13 # Correction for tank sprite cannon position
-        self.velocity = copy.deepcopy(start_velocity)
-        self.trajectory = copy.deepcopy([self.pos])
-        self.inflight = True
+        self.trajectory = [self.pos] # Start position in trajectory list
+        self.velocity = [INPUT_SCALE * (mouse_pos[0] - player.pos[0]),
+                         INPUT_SCALE * (mouse_pos[1] - player.pos[1])]
 
 
-    def increment(self) :
+    def increment(self):
         '''
         Increment projectile position by one timestep.
         '''
-        #if not self.collision:
         dt = TIME_SCALE / TICKRATE
-        position = copy.deepcopy(self.pos)
-        velocity = copy.deepcopy(self.velocity)
+        position = copy.copy(self.pos)
+        velocity = self.velocity #copy.deepcopy(self.velocity)
         position[0] = position[0] + velocity[0] * dt
         position[1] = position[1] + velocity[1] * dt
         velocity[1] = velocity[1] - GRAVITY * dt
@@ -439,8 +444,6 @@ class Projectile:
         in case of projectile out of bounds, left or right edge of the screen, set .inflight:False.
         In case of collision set .inflight:False and .collision:True and calculate coordinates of crater.
         '''
-        l = [0,0]
-        col_pos = [0,0]
 
         # When out of bounds
         if self.pos[0] < 0 or self.pos[0] > HRES - 1 :
@@ -453,8 +456,14 @@ class Projectile:
             # col_list = self.pos
             # Calculate exact intersection of projectile path with ground
             pos1 = self.trajectory[-2]
-            pos2 = self.pos
+            pos2 = self.trajectory[-1]
             slope_pos = (pos2[1] - pos1[1]) / (pos2[0] - pos1[0])
+            
+            #print("Pos1:", pos1, " Pos2", pos2)
+            #print("y:", (pos2[1] - pos1[1]), " X:", (pos2[0] - pos1[0]))
+            #print("Slope:", slope_pos)
+            
+            # Some magic intepolation to get more accurate collision position
             const = pos1[1] - (pos1[0] * slope_pos)
             l = []
             i = 0
@@ -475,9 +484,15 @@ class Projectile:
                 self.crater = self.pos
             else :
                 for i in l :
-                    if i[1] > world.ground[i[0]][1] :                        
+                    if i[1] >= world.ground[i[0]][1] :                        
                         self.crater = i
-                        break
+                        return
+                # This should not happen
+                self.crater = self.pos
+                print("HIT DETECTION ANOMALY")   
+                print("len l:", len(l))
+                print("Pos1:", pos1, " Pos2:", pos2)
+                print("Crater:", self.crater)
                         
     
     def check_hit(self, target, blast_size=25):
@@ -542,6 +557,39 @@ class Projectile:
             output.append(crater)
             break
         '''
+    
+class Blast:
+    kaboom = 0
+    kaboomfactor = KABOOMCONSTANT
+
+    @classmethod
+    def reset(cls):
+        cls.kaboom = 0
+        cls.kaboomfactor = KABOOMCONSTANT
+
+    @classmethod
+    def small(cls, crater, blastsize):
+        if cls.kaboom < blastsize :
+            cls.kaboom += 2
+            pygame.draw.circle(screen, CRATER_COLOR, crater, radius=cls.kaboom)
+        else :
+            pygame.draw.circle(screen, CRATER_COLOR, crater, radius=blastsize)
+    
+    @classmethod
+    def big(cls, crater):
+        global state
+        cls.kaboom += cls.kaboomfactor
+        cls.kaboomfactor *= 0.997
+        pygame.draw.circle(screen, CRATER_COLOR, crater, radius=cls.kaboom)
+        if cls.kaboom > HRES :
+            cls.kaboom = 0
+            cls.kaboomfactor = KABOOMCONSTANT
+            State.init_new = True
+
+    
+
+
+
 
 
 class Menu :
@@ -550,7 +598,19 @@ class Menu :
     p1name = ''
     p2name = ''
     cursor = 1
-  
+    cursor_count = 0
+
+    @classmethod
+    def cursor_blink(cls):
+        '''
+        Makes the cursor blink
+        '''
+        cls.cursor_count += 1
+        if cls.cursor_count >= 2 * TICKRATE :
+            cls.cursor_count = 0
+        cls.cursor = cls.cursor_count // TICKRATE
+
+
     @classmethod
     def typing(cls, char) :
         alfabet = string.ascii_letters
@@ -566,23 +626,25 @@ class Menu :
 
 
     @classmethod 
-    def title(cls, surface) :   # Draw Title screen 
-        global init_new
-        pygame.Surface.fill(screen, (0, 0, 0)) 
-
+    def title(cls, surface):
+        '''
+        Draw Title screen
+        '''
         for event in pygame.event.get() :
             # Key event    
             if event.type == pygame.KEYDOWN :
                 if event.key == pygame.K_RETURN :
-                    State.state['setup_menu'] = 1
-                    State.state['title_menu'] = 0
+                    State.setup_menu = True
+                    State.title_menu = False
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN :
                 mouse_presses = pygame.mouse.get_pressed()
                 if mouse_presses[0]:
-                    State.state['setup_menu'] = 1
-                    State.state['title_menu'] = 0
+                    State.setup_menu = True
+                    State.title_menu = False
+
+        pygame.Surface.fill(screen, (0, 0, 0))
 
         string = 'Tank duel'
         text = title_font.render(string, True, (255,0 ,0), (0,0,0))
@@ -616,8 +678,22 @@ class Menu :
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
-                # Key event    
+                    # Key event    
                 if event.type == pygame.KEYDOWN :
+                    if event.key == pygame.K_ESCAPE:
+                        if State.init_new == True:
+                            State.title_menu = True
+                            State.setup_menu = False
+                            return
+                        else:
+                            State.menu = False
+                            State.setup_menu = False
+                            return
+                    # If down key go to p2 select
+                    if event.key == pygame.K_DOWN:
+                        if cls.p1name:
+                            p1.name = cls.p1name
+                        cls.playerselect = 2
                     # If backspace
                     if event.key == 8 :
                         cls.p1name = cls.p1name[:-1]
@@ -637,14 +713,32 @@ class Menu :
                         if cls.p1name:
                             p1.name = cls.p1name
                         cls.playerselect = 2
-            
-                 
+                    
+                       
         elif cls.playerselect == 2:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
                 # Key event    
                 if event.type == pygame.KEYDOWN :
+                    if event.key == pygame.K_ESCAPE:
+                        if State.init_new == True:
+                            State.title_menu = True
+                            State.setup_menu = False
+                            cls.playerselect = 1
+                            return
+                        else:
+                            State.menu = False
+                            State.setup_menu = False
+                            cls.playerselect = 1
+                            return
+                        
+                    # If up key go to p1 select
+                    if event.key == pygame.K_UP:
+                        if cls.p2name:
+                            p2.name = cls.p2name
+                        cls.playerselect = 1
+                        
                     if event.key == 8 :
                         cls.p2name = cls.p2name[:-1]
                         # If space
@@ -662,9 +756,10 @@ class Menu :
                         if cls.p2name:
                             p2.name = cls.p2name
                         cls.playerselect = 1
-                        State.state['menu'] = 0
-                        State.state['setup_menu'] = 0
-                        init_new = True
+                        State.menu = False
+                        State.setup_menu = False
+                        State.init_new = True
+                        State.reset_score = True
         
         
         # Title line
@@ -787,8 +882,8 @@ def draw_score(surface, p1, p2) :   # Draw Score board
     surface.blit(text, text2rect)
 
 
-def draw_cannon(sprite, player):
-    cannon = pygame.transform.rotate(sprite, player.cannon_angle)
+def draw_cannon(player):
+    cannon = pygame.transform.rotate(player.cannon_sprite, player.cannon_angle)
     w = cannon.get_width() // 2
     h = cannon.get_height() // 2
     if player.nr == 1:
