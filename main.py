@@ -56,17 +56,11 @@ font2 = pygame.font.Font('freesansbold.ttf', 32)
 font_fps = pygame.font.Font('freesansbold.ttf', 16)
 font_small = pygame.font.Font('freesansbold.ttf', 16)
 
-#pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
-#state = {'menu' : 1, 'title_menu' : 1, 'setup_menu' : 0, 'pause_menu': 0, 'end_menu' : 0,}
 
 ###################################################################################
 
 # def main():
 async def main():
-
-    # Global variables (need to improve this)
-    ###########################################################################################################
-    
 
     # Initialise game objects
     fps = Frame_counter()
@@ -74,12 +68,8 @@ async def main():
     projectile = Projectile()
     p1 = Player()
     p2 = Player()
-    print(Player.count, f"Players: {Player.list[0].name}, {Player.list[1].name};")
+    #print(Player.count, f"Players: {Player.list[0].name}, {Player.list[1].name};")
 
-    cursor_count = 0
-
-
-    #################################################################################################3
     
     # Game loop
     while True :
@@ -99,13 +89,13 @@ async def main():
             # Select correct menu screen
             if State.title_menu == True :
                 Menu.title(screen)
-            if State.setup_menu == True :
+            elif State.setup_menu == True :
                 Menu.setup(screen, p1, p2)
-            if State.end_menu == True :
+            elif State.end_menu == True :
                 # implement endscreen
                 State.end_menu = False
-            #else:
-                #State.menu = False
+            else:
+                State.menu = False
                 
             await asyncio.sleep(0)
 
@@ -219,11 +209,7 @@ async def main():
 ################################################################################################################################
 
 
-
-
-
 # Game classes.
-
 class State:
     '''
     Stores global game state
@@ -250,12 +236,11 @@ class World:
         ground = []
         self.color = GROUND_COLOR
 
-    @classmethod
-    def _iteration(cls, samples, hres, vres) :
+
+    def _iteration(self, samples, hres, vres) :
         '''
         sampling for use in World.generate()
         '''
-        
         #nr of pixels per sample
         segment = hres / (samples - 1)
         
@@ -274,6 +259,7 @@ class World:
             terrain.append(float(terrain[i]) + slopelist[n])
         return terrain
     
+
     def generate(self, minsamples=MINSAMPLES, iterations=ITERATIONS, hres=HRES, vres=VRES) :
         '''
         Generate ground
@@ -605,8 +591,8 @@ class Menu :
         '''
         Makes the cursor blink
         '''
-        cls.cursor_count += 1
-        if cls.cursor_count >= 2 * TICKRATE :
+        cls.cursor_count += 2
+        if cls.cursor_count >= 2 * TICKRATE:
             cls.cursor_count = 0
         cls.cursor = cls.cursor_count // TICKRATE
 
