@@ -291,12 +291,12 @@ class Player:
     list = []
     active = None
 
-    def __init__(self, name=False, color=False):
+    def __init__(self, color=False):
         Player.count += 1
         self.nr = Player.count
         self.pos = [0, 0]
         self.set_color(color)
-        self.name = str(name) if name else f"Player {self.nr}"
+        self.set_name()
         self.score = 0
         self.set_sprite()
         self.hit = False
@@ -306,8 +306,8 @@ class Player:
     def __str__(self):
         return 'Player nr: {}\nName: {}\nPosition: {}\nColor: {}'.format(self.nr, self.name, self.pos, self.color)
     
-    def set_name(self, name):
-        self.name = str(name)
+    def set_name(self, name=''):
+        self.name = str(name) if name else f"Player {self.nr}"
 
     def gen_pos(self, world, hres=HRES):
         '''
@@ -696,8 +696,8 @@ class Menu :
                     # When press ENTER: Set P1 name if typed name != empty
                     # and change selector to p2
                     if event.key == pygame.K_RETURN:
-                        if cls.p1name:
-                            p1.name = cls.p1name
+                        #if cls.p1name:
+                            #p1.name = cls.p1name
                         cls.playerselect = 2
                     
                        
@@ -739,8 +739,8 @@ class Menu :
                     # When press ENTER: Set P1 name if typed name != empty
                     # exit menu and change selector back to p1
                     if event.key == pygame.K_RETURN:
-                        if cls.p2name:
-                            p2.name = cls.p2name
+                        p1.set_name(cls.p1name)
+                        p2.set_name(cls.p2name)
                         cls.playerselect = 1
                         State.menu = False
                         State.setup_menu = False
@@ -838,6 +838,7 @@ class Frame_counter:
         surface.blit(text, textRect)
 
 
+
 # Game methods
 def draw_score(surface, p1, p2):
     '''
@@ -871,6 +872,7 @@ def draw_score(surface, p1, p2):
     text2rect.top = textrect.bottom + 10
     text2rect.centerx = textrect.left + 60
     surface.blit(text, text2rect)
+
 
 
 def draw_cannon(player):
