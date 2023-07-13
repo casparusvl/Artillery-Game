@@ -37,7 +37,6 @@ BLASTSIZE = 27
 
 #screen_color = (0, 0, 0)
 GROUND_COLOR = (255, 0, 0)
-PROJECTILE_COLOR = (25, 25, 25)
 
 # Player generator setup
 DEFAULT_COLOR = ((0, 0, 255), (86, 130, 3),(255, 0, 0))
@@ -164,9 +163,12 @@ async def main():
         pygame.Surface.fill(screen, (0, 0, 0))                          # Draw background color.
         pygame.draw.aalines(screen, world.color, False, world.ground)   # Draw world.ground.
 
-        if projectile.inflight == True :                                        # Draw projectile if in flight.
-            pygame.draw.aalines(screen, projectile.color, False, projectile.trajectory[-7:])
+        if projectile.inflight == True :  
+            # Draw faint projectile smoketrail
+            pygame.draw.aalines(screen, (25, 25, 25), False, projectile.trajectory[-7:])
+            # Draw bright yellow projectile
             pygame.draw.aalines(screen, (255, 255, 0), False, projectile.trajectory[-2:])
+            # Alternate drawing of dot shaped projectile
             #pygame.draw.circle(screen, (255, 255, 0), projectile.trajectory[-1], radius=1)
         
         # Update cannon angle for active player, according to mouse position
@@ -190,7 +192,6 @@ async def main():
 
 
         # Draw hit animation if player is hit
-        
         if projectile.hit == True:
             Blast.big(projectile.crater)
 
@@ -223,6 +224,7 @@ class State:
     init_new = True
     reset_score = False
     turn = 0
+
 
 
 class World:
@@ -387,7 +389,6 @@ class Projectile:
         self.inflight = False
         self.collision = False
         self.hit = False
-        self.color = PROJECTILE_COLOR
         self.pos = []
         self.velocity = []
         self.trajectory = []
@@ -544,7 +545,9 @@ class Projectile:
             output.append(crater)
             break
         '''
-    
+
+
+
 class Blast:
     kaboom = 0
     kaboomfactor = KABOOMCONSTANT
@@ -793,6 +796,7 @@ class Menu :
         pygame.display.flip() 
 
 
+
 class Frame_counter:
     # Setup fps counter
 
@@ -801,9 +805,9 @@ class Frame_counter:
         Initiate at 0
         '''
         self.frame_count = 0
-        self.frame_time_count = 0
-        self.frame_time_avg = '0'
-        self.fps_avg = '0'
+        self.frame_time_sum = 0
+        self.frame_time_avg = 0
+        self.fps_avg = 0
         self.update_interval = TICKRATE // 2
 
     def update(self):
@@ -813,13 +817,13 @@ class Frame_counter:
         frame_time = int(clock.get_time())
         if self.frame_count < self.update_interval:
             self.frame_count += 1
-            self.frame_time_count += frame_time
+            self.frame_time_sum += frame_time
         else:
-            ft = self.frame_time_count / self.update_interval
-            self.frame_time_avg = str(round(ft, 1))
-            self.fps_avg = str(round(1000 / ft, 1))
+            ft = self.frame_time_sum / self.update_interval
+            self.frame_time_avg = round(ft, 1)
+            self.fps_avg = round(1000 / ft)
             self.frame_count = 0
-            self.frame_time_count = 0
+            self.frame_time_sum = 0
 
     def draw_framerate(self, surface):  
         text = font_fps.render(f"{self.fps_avg} fps", True, (0, 255, 0), (0,0,0))
@@ -835,8 +839,12 @@ class Frame_counter:
 
 
 # Game methods
-def draw_score(surface, p1, p2) :   # Draw Score board
+def draw_score(surface, p1, p2):
+    '''
+    Draw scoreboard, showing player names and scores.
+    '''
 
+    # player 1
     string = p1.name + '  |'
     text = font1.render(string, True, p1.color)
     textrect = text.get_rect()
@@ -850,7 +858,7 @@ def draw_score(surface, p1, p2) :   # Draw Score board
     text2rect.centerx = textrect.right - 60
     surface.blit(text, text2rect)
        
-
+    # Player 2
     string = '|  ' + p2.name
     text = font1.render(string, True, p2.color)
     textrect = text.get_rect()
@@ -866,6 +874,9 @@ def draw_score(surface, p1, p2) :   # Draw Score board
 
 
 def draw_cannon(player):
+    '''
+    Draw cannon part of player sprite in correct location and with correct angle
+    '''
     cannon = pygame.transform.rotate(player.cannon_sprite, player.cannon_angle)
     w = cannon.get_width() // 2
     h = cannon.get_height() // 2
