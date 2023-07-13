@@ -307,6 +307,9 @@ class Player:
         return 'Player nr: {}\nName: {}\nPosition: {}\nColor: {}'.format(self.nr, self.name, self.pos, self.color)
     
     def set_name(self, name=''):
+        '''
+        Default to name "Player {nr}" if no input given
+        '''
         self.name = str(name) if name else f"Player {self.nr}"
 
     def gen_pos(self, world, hres=HRES):
