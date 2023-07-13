@@ -55,7 +55,6 @@ font2 = pygame.font.Font('freesansbold.ttf', 32)
 font_fps = pygame.font.Font('freesansbold.ttf', 16)
 font_small = pygame.font.Font('freesansbold.ttf', 16)
 
-
 ###################################################################################
 
 # def main():
@@ -208,6 +207,7 @@ async def main():
         await asyncio.sleep(0)
 
 ################################################################################################################################
+
 
 
 # Game classes.
@@ -875,7 +875,6 @@ def draw_score(surface, p1, p2):
     text2rect.top = textrect.bottom + 10
     text2rect.centerx = textrect.left + 60
     surface.blit(text, text2rect)
-
 
 
 def draw_cannon(player):
