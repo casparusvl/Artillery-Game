@@ -17,8 +17,8 @@ MINSAMPLES = 5
 ITERATIONS = 4
 
 # Screen resolution
-HRES = 1280
-VRES = 720
+HRES = 1920
+VRES = 1080
 
 # Game engine settings
 TICKRATE = 120   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
@@ -588,7 +588,7 @@ class Blast:
 
     
 
-class Menu :
+class Menu:
     playerselect = 1
     count = 0
     p1name = ''
