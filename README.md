@@ -5,7 +5,7 @@
 ## Tank dual
 
 This is a proof of concept for a game in the style of the classic Scorched Earth. Both players control a tank, placed on a randomly generated 2D landscape, and the goal is to destroy eachother.
-The game is written in Pygame and can run both locally or in a webbrowser through Webassembly.
+The game is written in Pygame and can run both locally or in a web browser through Webassembly.
 
 ### How to play:
 
