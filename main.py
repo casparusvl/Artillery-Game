@@ -192,7 +192,7 @@ async def main():
         if projectile.collision == True:
             Blast.small(projectile.crater, BLASTSIZE)
 
-
+        
         # Draw hit animation if player is hit
         if projectile.hit == True:
             Blast.big(projectile.crater)

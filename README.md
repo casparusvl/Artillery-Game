@@ -21,7 +21,6 @@ At any moment, a new game can be started by pressing 'N'.
 
 ### Technical documentation:
 
-
 #### State class
 Contains all Global gamestate variables. I choose to use a class instead of a dict, mainly because i found the dot syntax more convenient than dict lookup.
 
@@ -50,6 +49,7 @@ This class draws the explosion animations. Small explosion for impact, big explo
 
 #### Menu class
 Contains the game menu and title screen. One seperate function for each menu.
+Has functions for typing inpute and to make the cursor blink.
 
 #### Frame counter class
 A counter to show fps or frametime. Updates the average fps and frametime twice a second
@@ -60,11 +60,15 @@ Draws the scoreboard, showing Player names and scores.
 #### draw_cannon
 Draws the cannons on both player models, with the correct angle according to relative mouse position
 
-
-
 #### Main function
-Uses asyncio, as this is a requirement for Webassembly support, using Pygbag.
+Uses asyncio, as this is a requirement for WebAssembly support.
+Using Pygbag to compile the Webassembly version.
 
+Pygame.time.Clock.tick is use for the game clock.
+Tickrate determines the physics and the maximum framerate the game will run on. Projectile physics will be correct independent of tickrate, but speed of explosion animations might change.
+If maximum framerate is not maintainable, game speed will slow down.
+
+A seperate loop is used for the menus.
 
 
 
