@@ -4,7 +4,7 @@
 
 ## Tanks dual
 
-This is a game in the style of the classic Scorched Earth. Both players control an artillery cannon on a randomly generates 2D landscape and can fire grenades at eachother.
+This is a proof of concept for a game in the style of the classic Scorched Earth. Both players control an artillery cannon on a randomly generates 2D landscape and can fire grenades at eachother.
 
 ### How to play:
 
