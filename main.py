@@ -57,8 +57,11 @@ font_small = pygame.font.Font('freesansbold.ttf', 16)
 
 ###################################################################################
 
-# def main():
+# async is required for pygbag
 async def main():
+    '''
+    Main function
+    '''
 
     # Initialise game objects
     fps = Frame_counter()
@@ -249,14 +252,16 @@ class World:
         # Create terrain samples and average slope between samples
         samplelist = []
         slopelist = []
-        for i in range(samples) :
-            samplelist.append(vres - (randint((0), (16 * vres // 20))))   # y Coordinates flipped 
-        for i in range(samples - 1) :
+        for i in range(samples):
+            # Get gandom y Coordinates within some bounds, y coordinates are flipped because of Pygame coordinate system
+            samplelist.append(vres - (randint((0), (16 * vres // 20))))   
+        for i in range(samples - 1):
+            # Fill array with the desired slope at each list segment, to be able to perform a linear interpolation.
             slopelist.append((samplelist[i + 1] - samplelist[i]) / segment)
 
-        # Create full length list of interpolated terrain, first value is samplelist[0]
+        # Perform linear interpolation. For each point add the slope value of the containing segment to the value of the previous point in the array.
         terrain = [samplelist[0]]
-        for i in range(hres - 1) :
+        for i in range(hres - 1):
             n = int (i / segment)
             terrain.append(float(terrain[i]) + slopelist[n])
         return terrain
@@ -265,10 +270,11 @@ class World:
     def generate(self, minsamples=MINSAMPLES, iterations=ITERATIONS, hres=HRES, vres=VRES) :
         '''
         Generate ground
+        Creates weighted avarage of an "iterations" nr of runs of iterate().
         '''
         unweightedground = np.zeros(hres)
         weightsum = 0
-        for i in range(iterations) :
+        for i in range(iterations):
             samples = minsamples * (2 ** i)
             weight = 1 / (2 ** i)
             weightsum += weight
@@ -301,7 +307,7 @@ class Player:
         self.set_sprite()
         self.hit = False
         Player.list.append(self)
-        
+
 
     def __str__(self):
         return 'Player nr: {}\nName: {}\nPosition: {}\nColor: {}'.format(self.nr, self.name, self.pos, self.color)
@@ -496,6 +502,7 @@ class Projectile:
         else :
             return False
 
+    
     # Partial implementation of rolling bomb weapon
     '''
     def roll(self):
