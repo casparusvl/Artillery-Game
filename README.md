@@ -79,9 +79,9 @@ If maximum framerate is not maintainable, game speed will slow down.
 Rolling bomb, homing missile etc.
 
 #### Wind 
-Wind that effects the weapon trajectory. The challenge here is the visual representation, e.g. a moving flag or clouds.
+Wind that effects the weapon trajectory. The challenge here is to make a nice visual representation, e.g. a moving flag or clouds.
 
 #### CPU controlled player AI
-It should be doable to create a simple cpu controlled player AI.
+It might be  be interesting to create a AI so the game can be played against the computer.
 
 
