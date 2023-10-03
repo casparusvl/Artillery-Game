@@ -589,6 +589,9 @@ class Blast:
     
 
 class Menu:
+    '''
+    Contains a method for each gamemenu
+    '''
     playerselect = 1
     count = 0
     p1name = ''
