@@ -105,13 +105,19 @@ async def main():
             
             # Key event
             if event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_n:
                     State.init_new = True
                     State.reset_score = True
-                
-                if event.key == pygame.K_ESCAPE:
+
+                if event.key == pygame.K_PAUSE:
+                    State.pause = True
                     State.menu = True
                     State.setup_menu = True
+
+                if event.key == pygame.K_ESCAPE:
+                    State.menu = True
+                    State.title_menu = True
 
             # Mousebutton event (launch projectile
             if projectile.inflight == False and projectile.hit == False :
@@ -221,7 +227,7 @@ class State:
     menu = True
     title_menu = True
     setup_menu = False
-    pause_menu = False
+    pause = False
     end_menu = False
 
     init_new = True
@@ -629,14 +635,21 @@ class Menu:
         '''
         Draw Title screen
         '''
+        State.pause = False
         for event in pygame.event.get() :
             # Key event    
             if event.type == pygame.KEYDOWN :
+                
                 if event.key == pygame.K_RETURN :
                     State.setup_menu = True
                     State.title_menu = False
+                
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+            
             if event.type == pygame.QUIT:
                 sys.exit()
+            
             if event.type == pygame.MOUSEBUTTONDOWN :
                 mouse_presses = pygame.mouse.get_pressed()
                 if mouse_presses[0]:
@@ -675,19 +688,25 @@ class Menu:
         
         if cls.playerselect == 1:
             for event in pygame.event.get():
+
                 if event.type == pygame.QUIT:
                     sys.exit()
-                    # Key event    
-                if event.type == pygame.KEYDOWN :
+
+                    # Key event
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        if State.init_new == True:
-                            State.title_menu = True
-                            State.setup_menu = False
-                            return
-                        else:
+                        State.title_menu = True
+                        State.setup_menu = False
+                        cls.playerselect = 1
+                        return
+
+                    if event.key == pygame.K_PAUSE:
+                        if State.pause == True:
+                            # If state is pause game
                             State.menu = False
                             State.setup_menu = False
                             return
+                        
                     # If down key go to p2 select
                     if event.key == pygame.K_DOWN:
                         if cls.p1name:
@@ -721,15 +740,16 @@ class Menu:
                 # Key event    
                 if event.type == pygame.KEYDOWN :
                     if event.key == pygame.K_ESCAPE:
-                        if State.init_new == True:
-                            State.title_menu = True
-                            State.setup_menu = False
-                            cls.playerselect = 1
-                            return
-                        else:
+                        State.title_menu = True
+                        State.setup_menu = False
+                        cls.playerselect = 1
+                        return
+                        
+                    if event.key == pygame.K_PAUSE:
+                        if State.pause == True:
+                            # If state is pause game
                             State.menu = False
                             State.setup_menu = False
-                            cls.playerselect = 1
                             return
                         
                     # If up key go to p1 select
