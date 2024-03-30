@@ -18,11 +18,11 @@ MINSAMPLES = 5
 ITERATIONS = 4
 
 # Screen resolution
-HRES = 1920
-VRES = 1080
+HRES = 1280
+VRES = 720
 
 # Game engine settings
-TICKRATE = 120   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
+TICKRATE = 60   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
 GRAVITY = -10
 INPUT_SCALE = 700 / HRES    #0.5
 TIME_SCALE = HRES / 200     #7
@@ -106,13 +106,19 @@ async def main():
             
             # Key event
             if event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_n:
                     State.init_new = True
                     State.reset_score = True
-                
-                if event.key == pygame.K_ESCAPE:
+
+                if event.key == pygame.K_PAUSE:
+                    State.pause = True
                     State.menu = True
                     State.setup_menu = True
+
+                if event.key == pygame.K_ESCAPE:
+                    State.menu = True
+                    State.title_menu = True
 
             # Mousebutton event (launch projectile
             if projectile.inflight == False and projectile.hit == False :
@@ -222,7 +228,7 @@ class State:
     menu = True
     title_menu = True
     setup_menu = False
-    pause_menu = False
+    pause = False
     end_menu = False
 
     init_new = True
@@ -233,11 +239,11 @@ class State:
 
 class World:
     '''
-    Generates terrain: .ground(np.array) on initiation
+    Generates terrain: .ground(list) on initiation
     '''
     def __init__(self):
         '''
-        generates ground on instantiation
+        Create empty world object
         '''
         ground = []
         self.color = GROUND_COLOR
@@ -245,7 +251,7 @@ class World:
 
     def _iteration(self, samples, hres, vres) :
         '''
-        sampling for use in World.generate()
+        Sampling for use in World.generate()
         '''
         #nr of pixels per sample
         segment = hres / (samples - 1)
@@ -254,7 +260,7 @@ class World:
         samplelist = []
         slopelist = []
         for i in range(samples):
-            # Get gandom y Coordinates within some bounds, y coordinates are flipped because of Pygame coordinate system
+            # Get random y Coordinates within some bounds, y coordinates are flipped because of Pygame coordinate system
             samplelist.append(vres - (randint((0), (16 * vres // 20))))   
         for i in range(samples - 1):
             # Fill array with the desired slope at each list segment, to be able to perform a linear interpolation.
@@ -271,7 +277,7 @@ class World:
     def generate(self, minsamples=MINSAMPLES, iterations=ITERATIONS, hres=HRES, vres=VRES) :
         '''
         Generate ground
-        Creates weighted avarage of an "iterations" nr of runs of iterate().
+        Creates weighted average of an "iterations" nr of runs of iterate().
         '''
         unweightedground = np.zeros(hres)
         weightsum = 0
@@ -630,14 +636,21 @@ class Menu:
         '''
         Draw Title screen
         '''
+        State.pause = False
         for event in pygame.event.get() :
             # Key event    
             if event.type == pygame.KEYDOWN :
+                
                 if event.key == pygame.K_RETURN :
                     State.setup_menu = True
                     State.title_menu = False
+                
+                if event.key == pygame.K_ESCAPE:
+                    sys.exit()
+            
             if event.type == pygame.QUIT:
                 sys.exit()
+            
             if event.type == pygame.MOUSEBUTTONDOWN :
                 mouse_presses = pygame.mouse.get_pressed()
                 if mouse_presses[0]:
@@ -676,19 +689,25 @@ class Menu:
         
         if cls.playerselect == 1:
             for event in pygame.event.get():
+
                 if event.type == pygame.QUIT:
                     sys.exit()
-                    # Key event    
-                if event.type == pygame.KEYDOWN :
+
+                    # Key event
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        if State.init_new == True:
-                            State.title_menu = True
-                            State.setup_menu = False
-                            return
-                        else:
+                        State.title_menu = True
+                        State.setup_menu = False
+                        cls.playerselect = 1
+                        return
+
+                    if event.key == pygame.K_PAUSE:
+                        if State.pause == True:
+                            # If state is pause game
                             State.menu = False
                             State.setup_menu = False
                             return
+                        
                     # If down key go to p2 select
                     if event.key == pygame.K_DOWN:
                         if cls.p1name:
@@ -722,15 +741,16 @@ class Menu:
                 # Key event    
                 if event.type == pygame.KEYDOWN :
                     if event.key == pygame.K_ESCAPE:
-                        if State.init_new == True:
-                            State.title_menu = True
-                            State.setup_menu = False
-                            cls.playerselect = 1
-                            return
-                        else:
+                        State.title_menu = True
+                        State.setup_menu = False
+                        cls.playerselect = 1
+                        return
+                        
+                    if event.key == pygame.K_PAUSE:
+                        if State.pause == True:
+                            # If state is pause game
                             State.menu = False
                             State.setup_menu = False
-                            cls.playerselect = 1
                             return
                         
                     # If up key go to p1 select
