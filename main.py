@@ -17,8 +17,8 @@ MINSAMPLES = 5
 ITERATIONS = 4
 
 # Screen resolution
-HRES = 1920
-VRES = 1080
+HRES = 1280
+VRES = 720
 
 # Game engine settings
 TICKRATE = 60   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
