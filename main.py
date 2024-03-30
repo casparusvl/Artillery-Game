@@ -21,7 +21,7 @@ HRES = 1920
 VRES = 1080
 
 # Game engine settings
-TICKRATE = 120   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
+TICKRATE = 200   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
 GRAVITY = -10
 INPUT_SCALE = 700 / HRES    #0.5
 TIME_SCALE = HRES / 200     #7
@@ -238,11 +238,11 @@ class State:
 
 class World:
     '''
-    Generates terrain: .ground(np.array) on initiation
+    Generates terrain: .ground(list) on initiation
     '''
     def __init__(self):
         '''
-        generates ground on instantiation
+        Create empty world object
         '''
         ground = []
         self.color = GROUND_COLOR
@@ -250,7 +250,7 @@ class World:
 
     def _iteration(self, samples, hres, vres) :
         '''
-        sampling for use in World.generate()
+        Sampling for use in World.generate()
         '''
         #nr of pixels per sample
         segment = hres / (samples - 1)
@@ -259,7 +259,7 @@ class World:
         samplelist = []
         slopelist = []
         for i in range(samples):
-            # Get gandom y Coordinates within some bounds, y coordinates are flipped because of Pygame coordinate system
+            # Get random y Coordinates within some bounds, y coordinates are flipped because of Pygame coordinate system
             samplelist.append(vres - (randint((0), (16 * vres // 20))))   
         for i in range(samples - 1):
             # Fill array with the desired slope at each list segment, to be able to perform a linear interpolation.
@@ -276,7 +276,7 @@ class World:
     def generate(self, minsamples=MINSAMPLES, iterations=ITERATIONS, hres=HRES, vres=VRES) :
         '''
         Generate ground
-        Creates weighted avarage of an "iterations" nr of runs of iterate().
+        Creates weighted average of an "iterations" nr of runs of iterate().
         '''
         unweightedground = np.zeros(hres)
         weightsum = 0
@@ -645,7 +645,7 @@ class Menu:
                     State.title_menu = False
                 
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
+                    sys.exit()
             
             if event.type == pygame.QUIT:
                 sys.exit()
