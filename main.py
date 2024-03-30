@@ -21,7 +21,7 @@ HRES = 1920
 VRES = 1080
 
 # Game engine settings
-TICKRATE = 200   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
+TICKRATE = 60   # This is also the max framerate. Game speed will slow down if TICKRATE can't be maintained
 GRAVITY = -10
 INPUT_SCALE = 700 / HRES    #0.5
 TIME_SCALE = HRES / 200     #7
