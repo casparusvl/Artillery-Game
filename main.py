@@ -64,6 +64,8 @@ async def main():
     '''
 
     # Initialise game objects
+    global state
+    state = GameState()
     fps = Frame_counter()
     world = World()
     projectile = Projectile()
@@ -77,26 +79,26 @@ async def main():
         clock.tick(TICKRATE)
         #clock.tick_busy_loop(TICKRATE)
         #time = pygame.time.get_ticks()
-        Player.active = Player.list[State.turn % len(Player.list)]
+        Player.active = Player.list[state.turn % len(Player.list)]
 
         # Get mouse position 
         mouse_pos = pygame.mouse.get_pos()
         
         # Menu loop
-        while State.menu == True:
+        while state.menu == True:
             clock.tick(TICKRATE)
             Menu.cursor_blink()
 
             # Select correct menu screen
-            if State.title_menu == True :
+            if state.title_menu == True :
                 Menu.title(screen)
-            elif State.setup_menu == True :
+            elif state.setup_menu == True :
                 Menu.setup(screen, p1, p2)
-            elif State.end_menu == True :
+            elif state.end_menu == True :
                 # implement endscreen
-                State.end_menu = False
+                state.end_menu = False
             else:
-                State.menu = False
+                state.menu = False
                 
             await asyncio.sleep(0)
 
@@ -107,17 +109,17 @@ async def main():
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_n:
-                    State.init_new = True
-                    State.reset_score = True
+                    state.init_new = True
+                    state.reset_score = True
 
                 if event.key == pygame.K_PAUSE:
-                    State.pause = True
-                    State.menu = True
-                    State.setup_menu = True
+                    state.pause = True
+                    state.menu = True
+                    state.setup_menu = True
 
                 if event.key == pygame.K_ESCAPE:
-                    State.menu = True
-                    State.title_menu = True
+                    state.menu = True
+                    state.title_menu = True
 
             # Mousebutton event (launch projectile
             if projectile.inflight == False and projectile.hit == False :
@@ -133,17 +135,17 @@ async def main():
 
 
         # Game logic
-        if State.init_new == True :    # Initiate new turn
+        if state.init_new == True :    # Initiate new turn
             world.generate()
             p1.gen_pos(world)
             p2.gen_pos(world)
             projectile.reset()
             projectile.hit = p1.hit = p2.hit = False
             Blast.reset()
-            State.init_new = False
-            if State.reset_score == True :
+            state.init_new = False
+            if state.reset_score == True :
                 p1.score = p2.score = 0
-                State.reset_score = False
+                state.reset_score = False
             
 
         # Calculate projectile flight and collision, hit detect.        
@@ -152,7 +154,7 @@ async def main():
             projectile.check_collision(world)
             if projectile.inflight == False:
                 # Projectile is not inflight anymore, so turn is over
-                State.turn += 1
+                state.turn += 1
             if projectile.collision == True:    
                 # In case projectile has had a collision.
                 # Do hit detection on both players and increment score on player hit
@@ -220,19 +222,22 @@ async def main():
 
 
 # Game classes.
-class State:
+class GameState:
     '''
     Stores global game state
     '''
-    menu = True
-    title_menu = True
-    setup_menu = False
-    pause = False
-    end_menu = False
+    __slots__ = ("menu", "title_menu", "setup_menu", "pause", "end_menu", "init_new", "reset_score", "turn")
 
-    init_new = True
-    reset_score = False
-    turn = 0
+    def __init__(self):
+        self.menu = True
+        self.title_menu = True
+        self.setup_menu = False
+        self.pause = False
+        self.end_menu = False
+
+        self.init_new = True
+        self.reset_score = False
+        self.turn = 0
 
 
 
@@ -590,7 +595,7 @@ class Blast:
         if cls.kaboom > HRES :
             cls.kaboom = 0
             cls.kaboomfactor = KABOOMCONSTANT
-            State.init_new = True
+            state.init_new = True
 
     
 
@@ -635,14 +640,14 @@ class Menu:
         '''
         Draw Title screen
         '''
-        State.pause = False
+        state.pause = False
         for event in pygame.event.get() :
             # Key event    
             if event.type == pygame.KEYDOWN :
                 
                 if event.key == pygame.K_RETURN :
-                    State.setup_menu = True
-                    State.title_menu = False
+                    state.setup_menu = True
+                    state.title_menu = False
                 
                 if event.key == pygame.K_ESCAPE:
                     sys.exit()
@@ -653,8 +658,8 @@ class Menu:
             if event.type == pygame.MOUSEBUTTONDOWN :
                 mouse_presses = pygame.mouse.get_pressed()
                 if mouse_presses[0]:
-                    State.setup_menu = True
-                    State.title_menu = False
+                    state.setup_menu = True
+                    state.title_menu = False
 
         pygame.Surface.fill(screen, (0, 0, 0))
 
@@ -695,16 +700,16 @@ class Menu:
                     # Key event
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        State.title_menu = True
-                        State.setup_menu = False
+                        state.title_menu = True
+                        state.setup_menu = False
                         cls.playerselect = 1
                         return
 
                     if event.key == pygame.K_PAUSE:
-                        if State.pause == True:
+                        if state.pause == True:
                             # If state is pause game
-                            State.menu = False
-                            State.setup_menu = False
+                            state.menu = False
+                            state.setup_menu = False
                             return
                         
                     # If down key go to p2 select
@@ -740,16 +745,16 @@ class Menu:
                 # Key event    
                 if event.type == pygame.KEYDOWN :
                     if event.key == pygame.K_ESCAPE:
-                        State.title_menu = True
-                        State.setup_menu = False
+                        state.title_menu = True
+                        state.setup_menu = False
                         cls.playerselect = 1
                         return
                         
                     if event.key == pygame.K_PAUSE:
-                        if State.pause == True:
+                        if state.pause == True:
                             # If state is pause game
-                            State.menu = False
-                            State.setup_menu = False
+                            state.menu = False
+                            state.setup_menu = False
                             return
                         
                     # If up key go to p1 select
@@ -775,10 +780,10 @@ class Menu:
                         p1.set_name(cls.p1name)
                         p2.set_name(cls.p2name)
                         cls.playerselect = 1
-                        State.menu = False
-                        State.setup_menu = False
-                        State.init_new = True
-                        State.reset_score = True
+                        state.menu = False
+                        state.setup_menu = False
+                        state.init_new = True
+                        state.reset_score = True
         
         
         # Title line
@@ -920,7 +925,6 @@ def draw_cannon(player):
     elif player.nr == 2:
         screen.blit(cannon, (player.pos[0] - w, player.pos[1] - h - 13))
         screen.blit(player.sprite, (player.pos[0] - 28, player.pos[1] - 28))
-
 
 
 asyncio.run(main())
