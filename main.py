@@ -285,7 +285,7 @@ class World:
 
     def generate(self, minsamples=MINSAMPLES, iterations=ITERATIONS, hres=HRES, vres=VRES) :
         '''
-        Generate ground
+        #### Generate ground.
         Creates weighted average of an "iterations" nr of runs of iterate().
         '''
         unweightedground = np.zeros(hres)
@@ -724,13 +724,14 @@ class Menu:
         string = "Game paused"
         text = font2.render(string, True, RED, (0,0,0))
         textrect = text.get_rect()
-        textrect.left = x_pointer = HRES * 3 // 8
+        textrect.centerx = HRES // 2
         textrect.bottom = y_pointer = VRES // 6
         surface.blit(text, textrect)
-
+        
+        x_pointer = textrect.left
         
         # Line 1
-        string = "'Enter' :"
+        string = "[Enter]"
         text = font1.render(string, True, GREY, (0,0,0))
         textrect = text.get_rect()
         textrect.left = x_pointer
@@ -745,7 +746,7 @@ class Menu:
         surface.blit(text, textrect)
 
         # Line 2
-        string = "'n' :"
+        string = "[n]"
         text = font1.render(string, True, GREY, (0,0,0))
         textrect = text.get_rect()
         textrect.left = x_pointer
@@ -760,7 +761,7 @@ class Menu:
         surface.blit(text, textrect)
 
         # Line 3
-        string = "'Esc' :"
+        string = "[Esc]"
         text = font1.render(string, True, GREY, (0,0,0))
         textrect = text.get_rect()
         textrect.left = x_pointer
@@ -970,8 +971,27 @@ class Frame_counter:
 
 
 # Game methods
-def draw_text(surface, font, color, x_pos, y_pos, text, *, top=False, right=False):
-    return
+def draw_text(surface, font, color, x_pos, y_pos, string, *, top=False, right=False):
+    '''
+    #### Simpify text drawing.
+    Currently unused
+    '''
+    text = font.render(string, True, color)
+    textrect = text.get_rect()
+
+    if top:
+        textrect.top = (x_pos)
+    else:
+        textrect.bottom = (x_pos)
+
+    if right:
+        textrect.right = (y_pos)
+    else:
+        textrect.left = (y_pos)
+        
+    surface.blit(text, textrect)
+
+    return textrect
 
         
 def draw_score(surface, p1, p2):
