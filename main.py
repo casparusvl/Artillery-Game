@@ -700,9 +700,7 @@ class Menu:
             # Key event    
             if event.type == pygame.KEYDOWN :
                 
-                if event.key == pygame.K_RETURN :
-                    state.pause = False
-                if event.key == pygame.K_PAUSE:
+                if event.key == pygame.K_RETURN or pygame.K_PAUSE or pygame.K_p:
                     state.pause = False
 
                 if event.key == pygame.K_n:
