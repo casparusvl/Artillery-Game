@@ -666,7 +666,7 @@ class Menu:
                     state.setup_menu = True
                     state.title_menu = False
 
-        pygame.Surface.fill(screen, (0, 0, 0))
+        pygame.Surface.fill(surface, (0, 0, 0))
 
         string = 'Tank duel'
         text = title_font.render(string, True, RED, (0,0,0))
@@ -718,7 +718,7 @@ class Menu:
                 sys.exit()
 
 
-        pygame.Surface.fill(screen, (0, 0, 0))
+        pygame.Surface.fill(surface, (0, 0, 0))
 
         # Title
         string = "Game paused"
@@ -876,7 +876,7 @@ class Menu:
                         state.init_new = True
                         state.reset_score = True
         
-        pygame.Surface.fill(screen, (0, 0, 0)) 
+        pygame.Surface.fill(surface, (0, 0, 0)) 
         
         # Title line
         string = 'Name'
@@ -970,6 +970,10 @@ class Frame_counter:
 
 
 # Game methods
+def draw_text(surface, font, color, x_pos, y_pos, text, *, top=False, right=False):
+    return
+
+        
 def draw_score(surface, p1, p2):
     '''
     Draw scoreboard, showing player names and scores.
