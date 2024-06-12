@@ -26,6 +26,12 @@ GRAVITY = -10
 INPUT_SCALE = 700 / HRES    #0.5
 TIME_SCALE = HRES / 200     #7
 
+# Colors
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+GREY = (166, 166, 166)
+
 # Setting for hit animation
 if TICKRATE < 100:
     KABOOMCONSTANT = 12
@@ -36,12 +42,14 @@ CRATER_COLOR = (255, 240, 0)
 BLASTSIZE = 27
 
 #screen_color = (0, 0, 0)
-GROUND_COLOR = (255, 0, 0)
+GROUND_COLOR = RED
 
 # Player generator setup
 DEFAULT_COLOR = ((0, 0, 255), (86, 130, 3),(255, 0, 0))
 #P1COLOR = (0, 0, 255)
 #P2COLOR = (86, 130, 0)
+
+
 
 # Init Pygame
 pygame.init()
@@ -54,6 +62,7 @@ font1 = pygame.font.Font('freesansbold.ttf', 24)
 font2 = pygame.font.Font('freesansbold.ttf', 32)
 font_fps = pygame.font.Font('freesansbold.ttf', 16)
 font_small = pygame.font.Font('freesansbold.ttf', 16)
+
 
 ###################################################################################
 
@@ -94,9 +103,10 @@ async def main():
                 Menu.title(screen)
             elif state.setup_menu == True :
                 Menu.setup(screen, p1, p2)
-            elif state.end_menu == True :
+            elif state.pause == True:
+                Menu.pause(screen)
+            #elif state.end_menu == True :
                 # implement endscreen
-                state.end_menu = False
             else:
                 state.menu = False
                 
@@ -108,18 +118,13 @@ async def main():
             # Key event
             if event.type == pygame.KEYDOWN:
 
+                if event.key == pygame.K_PAUSE or pygame.K_ESCAPE:
+                    state.menu = True
+                    state.pause = True
+
                 if event.key == pygame.K_n:
                     state.init_new = True
                     state.reset_score = True
-
-                if event.key == pygame.K_PAUSE:
-                    state.pause = True
-                    state.menu = True
-                    state.setup_menu = True
-
-                if event.key == pygame.K_ESCAPE:
-                    state.menu = True
-                    state.title_menu = True
 
             # Mousebutton event (launch projectile
             if projectile.inflight == False and projectile.hit == False :
@@ -664,14 +669,14 @@ class Menu:
         pygame.Surface.fill(screen, (0, 0, 0))
 
         string = 'Tank duel'
-        text = title_font.render(string, True, (255,0 ,0), (0,0,0))
+        text = title_font.render(string, True, RED, (0,0,0))
         textrect = text.get_rect()
         textrect.centerx = HRES // 2
         textrect.bottom = VRES // 4
         surface.blit(text, textrect)
         
         string = '(Click to start)'
-        text = font_small.render(string, True, (255, 0, 0), (0,0,0))
+        text = font_small.render(string, True, RED, (0,0,0))
         text2rect = text.get_rect()
         text2rect.centerx = HRES // 2
         text2rect.top = textrect.bottom + 5
@@ -683,13 +688,101 @@ class Menu:
         textrect.bottomright = (HRES - 10, VRES -10)
         surface.blit(text, textrect)
 
+        pygame.display.flip()
+
+    @classmethod
+    def pause(cls, surface):
+        '''
+        Pause screen
+        '''
+
+        for event in pygame.event.get() :
+            # Key event    
+            if event.type == pygame.KEYDOWN :
+                
+                if event.key == pygame.K_RETURN :
+                    state.pause = False
+                if event.key == pygame.K_PAUSE:
+                    state.pause = False
+
+                if event.key == pygame.K_n:
+                    state.pause = False
+                    state.setup_menu = True
+
+                if event.key == pygame.K_ESCAPE:
+                    state.pause = False
+                    state.title_menu = True
+
+                if event.key == pygame.K_ESCAPE:
+                    pass
+            
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+
+        pygame.Surface.fill(screen, (0, 0, 0))
+
+        # Title
+        string = "Game paused"
+        text = font2.render(string, True, RED, (0,0,0))
+        textrect = text.get_rect()
+        textrect.left = x_pointer = HRES * 3 // 8
+        textrect.bottom = y_pointer = VRES // 6
+        surface.blit(text, textrect)
+
+        
+        # Line 1
+        string = "'Enter' :"
+        text = font1.render(string, True, GREY, (0,0,0))
+        textrect = text.get_rect()
+        textrect.left = x_pointer
+        textrect.bottom = y_pointer = y_pointer + 120
+        surface.blit(text, textrect)
+
+        string = "Continue"
+        text = font1.render(string, True, GREY, (0,0,0))
+        textrect = text.get_rect()
+        textrect.left = x_pointer + 160
+        textrect.bottom = y_pointer
+        surface.blit(text, textrect)
+
+        # Line 2
+        string = "'n' :"
+        text = font1.render(string, True, GREY, (0,0,0))
+        textrect = text.get_rect()
+        textrect.left = x_pointer
+        textrect.bottom = y_pointer = y_pointer + 40
+        surface.blit(text, textrect)
+
+        string = "New Game"
+        text = font1.render(string, True, GREY, (0,0,0))
+        textrect = text.get_rect()
+        textrect.left = x_pointer + 160
+        textrect.bottom = y_pointer
+        surface.blit(text, textrect)
+
+        # Line 3
+        string = "'Esc' :"
+        text = font1.render(string, True, GREY, (0,0,0))
+        textrect = text.get_rect()
+        textrect.left = x_pointer
+        textrect.bottom = y_pointer = y_pointer + 40
+        surface.blit(text, textrect)
+
+        string = "Exit to Title"
+        text = font1.render(string, True, GREY, (0,0,0))
+        textrect = text.get_rect()
+        textrect.left = x_pointer + 160
+        textrect.bottom = y_pointer
+        surface.blit(text, textrect)
+
         pygame.display.flip() 
- 
+
+
 
     @classmethod
     def setup(cls, surface, p1, p2) :   # Draw setup screen
         
-        pygame.Surface.fill(screen, (0, 0, 0)) 
         
         if cls.playerselect == 1:
             for event in pygame.event.get():
@@ -785,17 +878,18 @@ class Menu:
                         state.init_new = True
                         state.reset_score = True
         
+        pygame.Surface.fill(screen, (0, 0, 0)) 
         
         # Title line
         string = 'Name'
-        text = font2.render(string, True, (255,0 ,0), (0,0,0))
+        text = font2.render(string, True, RED, (0,0,0))
         textrect = text.get_rect()
         textrect.left = HRES * 3 // 8
         textrect.bottom = VRES // 6
         surface.blit(text, textrect)
 
         string = '' #'Color'
-        text = font2.render(string, True, (255,0 ,0), (0,0,0))
+        text = font2.render(string, True, RED, (0,0,0))
         textrect = text.get_rect()
         textrect.left = HRES * 5 // 8
         textrect.bottom = VRES // 6
@@ -864,13 +958,13 @@ class Frame_counter:
             self.frame_time_sum = 0
 
     def draw_framerate(self, surface):  
-        text = font_fps.render(f"{self.fps_avg} fps", True, (0, 255, 0), (0,0,0))
+        text = font_fps.render(f"{self.fps_avg} fps", True, GREEN, (0,0,0))
         textRect = text.get_rect()
         textRect.topleft = (10, 10)
         surface.blit(text, textRect)
 
     def draw_frametime(self, surface):
-        text = font_fps.render(f"{self.frame_time_avg} ms", True, (0, 255, 0), (0,0,0))
+        text = font_fps.render(f"{self.frame_time_avg} ms", True, GREEN, (0,0,0))
         textRect = text.get_rect()
         textRect.topleft = (10, 10)
         surface.blit(text, textRect)
@@ -927,7 +1021,8 @@ def draw_cannon(player):
         screen.blit(player.sprite, (player.pos[0] - 28, player.pos[1] - 28))
 
 
-asyncio.run(main())
 
-#if __name__ == "__main__":
+
+if __name__ == "__main__":
+    asyncio.run(main())
 #   main()
