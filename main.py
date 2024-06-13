@@ -974,7 +974,7 @@ def draw_text(surface, string, font, color, x_pos, y_pos, *, x_side='left', y_si
         case 'center':
             textrect.centerx = x_pos
         case _:
-            raise ValueError("Incorrect value for keyword argument [x_side]")
+            raise ValueError("Invalid value for keyword argument: [x_side]")
 
     match y_side:
         case 'bottom':
@@ -984,7 +984,7 @@ def draw_text(surface, string, font, color, x_pos, y_pos, *, x_side='left', y_si
         case 'center':
             textrect.centery = y_pos
         case _:
-            raise ValueError("Incorrect value for keyword argument [y_side]")
+            raise ValueError("Invalid value for keyword argument: [y_side]")
 
     surface.blit(text, textrect)
     return textrect
