@@ -2,8 +2,8 @@ import asyncio
 import copy
 import math
 from random import randint
-import string
 import sys
+#import string
 
 import numpy as np
 import pygame
@@ -31,6 +31,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 GREY = (166, 166, 166)
+DARKGREY = (100, 100, 100)
 
 # Setting for hit animation
 if TICKRATE < 100:
@@ -625,7 +626,8 @@ class Menu:
             cls.cursor_count = 0
         cls.cursor = cls.cursor_count // TICKRATE
 
-
+    # This is not used
+    '''
     @classmethod
     def typing(cls, char) :
         alfabet = string.ascii_letters
@@ -638,7 +640,7 @@ class Menu:
         else :
             char = ''
         return char
-
+    '''
 
     @classmethod 
     def title(cls, surface):
@@ -667,27 +669,9 @@ class Menu:
                     state.title_menu = False
 
         pygame.Surface.fill(surface, (0, 0, 0))
-
-        string = 'Tank duel'
-        text = title_font.render(string, True, RED, (0,0,0))
-        textrect = text.get_rect()
-        textrect.centerx = HRES // 2
-        textrect.bottom = VRES // 4
-        surface.blit(text, textrect)
-        
-        string = '(Click to start)'
-        text = font_small.render(string, True, RED, (0,0,0))
-        text2rect = text.get_rect()
-        text2rect.centerx = HRES // 2
-        text2rect.top = textrect.bottom + 5
-        surface.blit(text, text2rect)
-        
-        string = '2023' #', by Kasper Vloon'
-        text = font_small.render(string, True, (100, 100, 100), (0,0,0))
-        textrect = text.get_rect()
-        textrect.bottomright = (HRES - 10, VRES -10)
-        surface.blit(text, textrect)
-
+        textrect = draw_text(surface, 'Tank Duel', title_font, RED, (HRES // 2), (VRES // 4), x_side="center")
+        textrect = draw_text(surface, '(Click to start)', font_small, RED, (HRES // 2), (textrect.bottom + 5), x_side="center", y_side="top")
+        textrect = draw_text(surface, 'Kasper Vloon', font_small, DARKGREY, (HRES - 10), (VRES -10), x_side="right")
         pygame.display.flip()
 
     @classmethod
@@ -971,26 +955,38 @@ class Frame_counter:
 
 
 # Game methods
-def draw_text(surface, font, color, x_pos, y_pos, string, *, top=False, right=False):
+
+#simplify text drawing, not yet imokemented everywhere
+def draw_text(surface, string, font, color, x_pos, y_pos, *, x_side='left', y_side='bottom'):
     '''
-    #### Simpify text drawing.
-    Currently unused
+    #### KeyArgs:
+    [x_side]: 'left', 'right', 'center'
+    [y_side]: 'bottom', 'top', 'center'
     '''
-    text = font.render(string, True, color)
+    text = font.render(string, True, color, (0,0,0))
     textrect = text.get_rect()
 
-    if top:
-        textrect.top = (x_pos)
-    else:
-        textrect.bottom = (x_pos)
+    match x_side:
+        case 'left':
+            textrect.left = x_pos
+        case 'right':
+            textrect.right = x_pos
+        case 'center':
+            textrect.centerx = x_pos
+        case _:
+            raise ValueError("Incorrect value foy keyword argument [x_side]")
 
-    if right:
-        textrect.right = (y_pos)
-    else:
-        textrect.left = (y_pos)
-        
+    match y_side:
+        case 'bottom':
+            textrect.bottom = y_pos
+        case 'top':
+            textrect.top = y_pos
+        case 'center':
+            textrect.centery = y_pos
+        case _:
+            raise ValueError("Incorrect value foy keyword argument [y_side]")
+
     surface.blit(text, textrect)
-
     return textrect
 
         
