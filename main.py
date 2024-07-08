@@ -94,6 +94,22 @@ async def main():
         # Get mouse position 
         mouse_pos = pygame.mouse.get_pos()
         
+        # Initiate new turn
+        if state.init_new:
+                if state.victory:
+                    state.menu = True
+                else:
+                    world.generate()
+                    p1.gen_pos(world)
+                    p2.gen_pos(world)
+                    projectile.reset()
+                    projectile.hit = p1.hit = p2.hit = False
+                    Blast.reset()
+                    state.init_new = False
+                    if state.reset_score == True :
+                        p1.score = p2.score = 0
+                        state.reset_score = False
+
         # Menu loop
         while state.menu == True:
             clock.tick(TICKRATE)
