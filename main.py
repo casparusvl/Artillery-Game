@@ -100,7 +100,9 @@ async def main():
             Menu.cursor_blink()
 
             # Select correct menu screen
-            if state.title_menu == True :
+            if state.victory:
+                Menu.victory(screen, state.victory)
+            elif state.title_menu == True :
                 Menu.title(screen)
             elif state.setup_menu == True :
                 Menu.setup(screen, p1, p2)
@@ -113,19 +115,26 @@ async def main():
                 
             await asyncio.sleep(0)
 
+        
         # Events
         for event in pygame.event.get() :
             
             # Key event
             if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_PAUSE or pygame.K_ESCAPE:
-                    state.menu = True
-                    state.pause = True
-
-                if event.key == pygame.K_n:
+                # Victory screen test
+                #######################################
+                """
+                if event.key == pygame.K_v:
                     state.init_new = True
-                    state.reset_score = True
+                    state.victory = p1
+                """
+                ########################################
+
+                if event.key in [pygame.K_ESCAPE, pygame.K_p, pygame.K_PAUSE]:
+                   state.menu = True
+                   state.pause = True
+
 
             # Mousebutton event (launch projectile
             if projectile.inflight == False and projectile.hit == False :
@@ -141,17 +150,21 @@ async def main():
 
 
         # Game logic
-        if state.init_new == True :    # Initiate new turn
-            world.generate()
-            p1.gen_pos(world)
-            p2.gen_pos(world)
-            projectile.reset()
-            projectile.hit = p1.hit = p2.hit = False
-            Blast.reset()
-            state.init_new = False
-            if state.reset_score == True :
-                p1.score = p2.score = 0
-                state.reset_score = False
+        # Initiate new turn
+        if state.init_new:
+                if state.victory:
+                    state.menu = True
+                else:
+                    world.generate()
+                    p1.gen_pos(world)
+                    p2.gen_pos(world)
+                    projectile.reset()
+                    projectile.hit = p1.hit = p2.hit = False
+                    Blast.reset()
+                    state.init_new = False
+                    if state.reset_score == True :
+                        p1.score = p2.score = 0
+                        state.reset_score = False
             
 
         # Calculate projectile flight and collision, hit detect.        
@@ -166,12 +179,21 @@ async def main():
                 # Do hit detection on both players and increment score on player hit
                 if projectile.check_hit(p1.pos):
                     print(f"{p1.name} was hit!")
-                    p2.increase_score()                 
+                    p2.increase_score()
+                    state.turn = 0                 
                     projectile.hit = p1.hit = True
                 if projectile.check_hit(p2.pos):
                     print(f"{p2.name} was hit!")
                     p1.increase_score()
+                    state.turn = 1
                     projectile.hit = p2.hit = True
+                
+                # Check victory condition
+                if p1.score >= 3:
+                    state.victory = p1
+                if p2.score >= 3:
+                    state.victory = p2
+
 
 
 
@@ -232,7 +254,7 @@ class GameState:
     '''
     Stores global game state
     '''
-    __slots__ = ("menu", "title_menu", "setup_menu", "pause", "end_menu", "init_new", "reset_score", "turn")
+    #__slots__ = ("menu", "title_menu", "setup_menu", "pause", "end_menu", "init_new", "reset_score", "turn", "victory")
 
     def __init__(self):
         self.menu = True
@@ -244,6 +266,7 @@ class GameState:
         self.init_new = True
         self.reset_score = False
         self.turn = 0
+        self.victory = None
 
 
 
@@ -675,23 +698,26 @@ class Menu:
         pygame.display.flip()
 
     @classmethod
-    def pause(cls, surface):
+    def victory(cls, surface, winner):
         '''
-        Pause screen
+        Draw Victory screen
         '''
-
         for event in pygame.event.get() :
             # Key event    
             if event.type == pygame.KEYDOWN :
                 
-                if event.key == pygame.K_RETURN or pygame.K_PAUSE or pygame.K_p:
+                if event.key == pygame.K_r:
+                    state.victory = False
                     state.pause = False
-
+                    state.reset_score = True
+                    
                 if event.key == pygame.K_n:
+                    state.victory = False
                     state.pause = False
                     state.setup_menu = True
 
                 if event.key == pygame.K_ESCAPE:
+                    state.victory = False
                     state.pause = False
                     state.title_menu = True
 
@@ -703,64 +729,68 @@ class Menu:
 
 
         pygame.Surface.fill(surface, (0, 0, 0))
+        
+        # Victory message
+        textrect = draw_text(surface, f"{winner.name} WINS!", title_font, winner.color, (HRES // 2), (VRES // 4), x_side="center")
 
-        # Title
-        string = "Game paused"
-        text = font2.render(string, True, RED, (0,0,0))
-        textrect = text.get_rect()
-        textrect.centerx = HRES // 2
-        textrect.bottom = y_pointer = VRES // 6
-        surface.blit(text, textrect)
-        
-        x_pointer = textrect.left
-        
         # Line 1
-        string = "[Enter]"
-        text = font1.render(string, True, GREY, (0,0,0))
-        textrect = text.get_rect()
-        textrect.left = x_pointer
-        textrect.bottom = y_pointer = y_pointer + 120
-        surface.blit(text, textrect)
-
-        string = "Continue"
-        text = font1.render(string, True, GREY, (0,0,0))
-        textrect = text.get_rect()
-        textrect.left = x_pointer + 160
-        textrect.bottom = y_pointer
-        surface.blit(text, textrect)
+        textrect = draw_text(surface, "[r]", font1, GREY, textrect.centerx - 140, textrect.bottom + 120, x_side="left")
+        textrect = draw_text(surface, "Rematch", font1, GREY, textrect.left + 160, textrect.bottom, x_side="left")
 
         # Line 2
-        string = "[n]"
-        text = font1.render(string, True, GREY, (0,0,0))
-        textrect = text.get_rect()
-        textrect.left = x_pointer
-        textrect.bottom = y_pointer = y_pointer + 40
-        surface.blit(text, textrect)
-
-        string = "New Game"
-        text = font1.render(string, True, GREY, (0,0,0))
-        textrect = text.get_rect()
-        textrect.left = x_pointer + 160
-        textrect.bottom = y_pointer
-        surface.blit(text, textrect)
+        textrect = draw_text(surface, "[n]", font1, GREY, textrect.left - 160, textrect.bottom + 40, x_side="left")
+        textrect = draw_text(surface, "New Game", font1, GREY, textrect.left + 160, textrect.bottom, x_side="left")
 
         # Line 3
-        string = "[Esc]"
-        text = font1.render(string, True, GREY, (0,0,0))
-        textrect = text.get_rect()
-        textrect.left = x_pointer
-        textrect.bottom = y_pointer = y_pointer + 40
-        surface.blit(text, textrect)
+        textrect = draw_text(surface, "[Esc]", font1, GREY, textrect.left - 160, textrect.bottom + 40, x_side="left")
+        textrect = draw_text(surface, "Exit to Title", font1, GREY, textrect.left + 160, textrect.bottom, x_side="left")
 
-        string = "Exit to Title"
-        text = font1.render(string, True, GREY, (0,0,0))
-        textrect = text.get_rect()
-        textrect.left = x_pointer + 160
-        textrect.bottom = y_pointer
-        surface.blit(text, textrect)
+        pygame.display.flip()      
+
+
+    @classmethod
+    def pause(cls, surface):
+        '''
+        Pause screen
+        '''
+
+        for event in pygame.event.get() :
+            # Key event    
+            if event.type == pygame.KEYDOWN :
+                
+                if event.key in [pygame.K_PAUSE, pygame.K_p]:
+                    state.pause = False
+
+                if event.key == pygame.K_n:
+                    state.pause = False
+                    state.setup_menu = True
+
+                if event.key == pygame.K_ESCAPE:
+                    state.pause = False
+                    state.title_menu = True
+            
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+
+        pygame.Surface.fill(surface, (0, 0, 0))
+        
+        # Pause message
+        textrect = draw_text(surface, "Game paused", font2, RED, (HRES // 2), (VRES // 4), x_side="center")
+
+        # Line 1
+        textrect = draw_text(surface, "[p]", font1, GREY, textrect.centerx - 140, textrect.bottom + 120, x_side="left")
+        textrect = draw_text(surface, "Continue", font1, GREY, textrect.left + 160, textrect.bottom, x_side="left")
+
+        # Line 2
+        textrect = draw_text(surface, "[n]", font1, GREY, textrect.left - 160, textrect.bottom + 40, x_side="left")
+        textrect = draw_text(surface, "New Game", font1, GREY, textrect.left + 160, textrect.bottom, x_side="left")
+
+        # Line 3
+        textrect = draw_text(surface, "[Esc]", font1, GREY, textrect.left - 160, textrect.bottom + 40, x_side="left")
+        textrect = draw_text(surface, "Exit to Title", font1, GREY, textrect.left + 160, textrect.bottom, x_side="left")
 
         pygame.display.flip() 
-
 
 
     @classmethod
