@@ -138,14 +138,20 @@ async def main():
             # Key event
             if event.type == pygame.KEYDOWN:
 
-                # Victory screen test
+                # Tests
                 #######################################
+                # Victory screen
                 """
                 if event.key == pygame.K_v:
                     state.init_new = True
                     state.victory = p1
                 """
+
+                # Generate new terrain
+                if event.key == pygame.K_n:
+                    state.init_new = True
                 ########################################
+
 
                 if event.key in [pygame.K_ESCAPE, pygame.K_p, pygame.K_PAUSE]:
                    state.menu = True
