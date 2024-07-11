@@ -94,6 +94,7 @@ async def main():
         # Get mouse position 
         mouse_pos = pygame.mouse.get_pos()
         
+
         # Initiate new turn
         if state.init_new:
                 if state.victory:
@@ -109,6 +110,7 @@ async def main():
                     if state.reset_score == True :
                         p1.score = p2.score = 0
                         state.reset_score = False
+
 
         # Menu loop
         while state.menu == True:
@@ -172,22 +174,6 @@ async def main():
 
 
         # Game logic
-        # Initiate new turn
-        if state.init_new:
-                if state.victory:
-                    state.menu = True
-                else:
-                    world.generate()
-                    p1.gen_pos(world)
-                    p2.gen_pos(world)
-                    projectile.reset()
-                    projectile.hit = p1.hit = p2.hit = False
-                    Blast.reset()
-                    state.init_new = False
-                    if state.reset_score == True :
-                        p1.score = p2.score = 0
-                        state.reset_score = False
-            
 
         # Calculate projectile flight and collision, hit detect.        
         if projectile.inflight == True :                # Increment if in flight.
@@ -225,9 +211,10 @@ async def main():
 
         if projectile.inflight == True :  
             # Draw faint projectile smoketrail
-            pygame.draw.aalines(screen, (25, 25, 25), False, projectile.trajectory[-7:])
+            pygame.draw.aalines(screen, (25, 25, 25), False, projectile.trajectory[-70:])
             # Draw bright yellow projectile
-            pygame.draw.aalines(screen, (255, 255, 0), False, projectile.trajectory[-2:])
+            pygame.draw.aalines(screen, (255, 255, 0), False, projectile.trajectory[-10:])
+            pygame.draw.aalines(screen, (255, 255, 0), False, projectile.trajectory)
             # Alternate drawing of dot shaped projectile
             #pygame.draw.circle(screen, (255, 255, 0), projectile.trajectory[-1], radius=1)
         
@@ -463,6 +450,8 @@ class Projectile:
         self.pos = []
         self.velocity = []
         self.trajectory = []
+        self.interp_traj = []
+        self.col_checked = 0
         self.crater = []
 
 
@@ -474,9 +463,13 @@ class Projectile:
         self.inflight = True
         self.collision = False
         self.hit = False
+        
         self.pos = copy.copy(player.pos)
-        self.pos[1] = self.pos[1] - 13 # Correction for tank sprite cannon position
+        self.pos[1] = self.pos[1] - 13 # Correction to center on tank sprite
         self.trajectory = [self.pos] # Start position in trajectory list
+        self.interp_traj = [self.pos]
+        
+        self.col_checked = 0
         self.velocity = [INPUT_SCALE * (mouse_pos[0] - player.pos[0]),
                          INPUT_SCALE * (mouse_pos[1] - player.pos[1])]
 
@@ -486,74 +479,62 @@ class Projectile:
         Increment projectile position by one timestep.
         '''
         dt = TIME_SCALE / TICKRATE
-        position = copy.copy(self.pos)
-        velocity = self.velocity #copy.deepcopy(self.velocity)
+        position = copy.copy(self.trajectory[-1])
+        velocity = self.velocity
         position[0] = position[0] + velocity[0] * dt
         position[1] = position[1] + velocity[1] * dt
         velocity[1] = velocity[1] - GRAVITY * dt
-        self.pos = position
         self.velocity = velocity
         self.trajectory.append(position)
+        self.interp_traj.extend(self.interpolate(self.trajectory[-2:]))
+        
     
+    def interpolate(self, points):
+        '''
+        Get value of trajectory for every x coordinate, to be able to do accurate collision detection
+        '''
+        # Determine interpolated function
+        slope = (points[1][1] - points[0][1]) / (points[1][0] - points[0][0])
+        const = points[0][1] - slope * points[0][0]
+        # function: round(const + slope * i, 2)
 
+        # Calculate graph of interpolated function in between points
+        graph = []
+        if self.velocity[0] >= 0:
+            for i in range(int(points[0][0]) + 1, int(points[1][0]) + 1):
+                graph.append([i, const + slope * i, 2])
+        else:
+            for i in range(int(points[0][0]), int(points[1][0]), -1):
+                graph.append([i, const + slope * i, 2])
+        #print(points)
+        #print(slope)
+        #print("Raak: ", graph)
+        return graph
+
+    
     def check_collision(self, world):
         '''
         Check for collision with world.
         in case of projectile out of bounds, left or right edge of the screen, set .inflight:False.
         In case of collision set .inflight:False and .collision:True and calculate coordinates of crater.
         '''
-
-        # When out of bounds
-        if self.pos[0] < 0 or self.pos[0] > HRES - 1 :
-            self.inflight = False
-
-        # When collision with ground
-        elif self.pos[1] >= world.ground[int(self.pos[0])][1]: # y Coordinates flipped 
-            self.inflight = False
-            self.collision = True
-            # col_list = self.pos
-            # Calculate exact intersection of projectile path with ground
-            pos1 = self.trajectory[-2]
-            pos2 = self.trajectory[-1]
-            slope_pos = (pos2[1] - pos1[1]) / (pos2[0] - pos1[0])
+        for i in self.interp_traj[self.col_checked:]:
+            self.col_checked = len(self.interp_traj)
             
-            #print("Pos1:", pos1, " Pos2", pos2)
-            #print("y:", (pos2[1] - pos1[1]), " X:", (pos2[0] - pos1[0]))
-            #print("Slope:", slope_pos)
+            # When out of bounds
+            if i[0] < 0 or i[0] >= HRES:
+                self.inflight = False
+                return
             
-            # Some magic intepolation to get more accurate collision position.
-            # This is a mess, but it works
-            const = pos1[1] - (pos1[0] * slope_pos)
-            l = []
-            i = 0
-            if pos2[0] > pos1[0] :
-                while i < abs(pos2[0] - pos1[0]) :
-                    i += 1
-                    x = int(pos1[0]) + i
-                    y = slope_pos * x + const
-                    l.append([x, y])
-            else :
-                while i < abs(pos2[0] - pos1[0]) :
-                    i += 1
-                    x = int(pos1[0]) - i
-                    y = slope_pos * x + const
-                    l.append([x, y])
-
-            if len(l) < 2 :
-                self.crater = self.pos
-            else :
-                for i in l :
-                    if i[1] >= world.ground[i[0]][1] :                        
-                        self.crater = i
-                        return
-                # This should not happen
-                self.crater = self.pos
-                print("HIT DETECTION ANOMALY")   
-                print("len l:", len(l))
-                print("Pos1:", pos1, " Pos2:", pos2)
+            # When collision with ground
+            elif i[1] >= world.ground[i[0]][1]:
+                self.crater = world.ground[i[0]]
+                self.collision = True
+                self.inflight = False
                 print("Crater:", self.crater)
-                        
-    
+                return
+            
+
     def check_hit(self, target, blast_size=25):
         '''
         Call in case of collision. Check if target coordinates have been hit
@@ -617,7 +598,6 @@ class Projectile:
             output.append(crater)
             break
         '''
-
 
 
 class Blast:
