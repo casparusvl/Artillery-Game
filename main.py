@@ -104,7 +104,6 @@ async def main():
                     p1.gen_pos(world)
                     p2.gen_pos(world)
                     projectile.reset()
-                    #Blast.reset()
                     state.init_new = False
                     if state.reset_score == True :
                         p1.score = p2.score = 0
