@@ -17,7 +17,7 @@ During gameplay players can always pause the game and return to the setup screen
 #### Gameplay:
 Player 1 will start the game. Use the mouse to aim and determine the velocity of the shot. the further from the cannon you click, the further the shot will reach. Try to hit the other player to score a point! Be carefull though: Don't hit yourself!
 After your shot, it will be the other players turn and so on, until a hit is scored. At this point the surviving Player will get a point and a new world will be generated, so that the game can continue.
-First player too reach 3 kills wins the game!
+First player to reach 3 kills wins the game!
 
 
 ### Technical documentation:
