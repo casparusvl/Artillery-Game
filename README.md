@@ -1,8 +1,8 @@
-# Tank Dual CS50 final project
+# Tank Duel CS50 final project
 #### Video Demo:  <URL HERE>
 #### Description:
 
-## Tank dual
+## Tank duel
 
 This is a proof of concept for a game in the style of the classic Scorched Earth. Both players control a tank, placed on a randomly generated 2D landscape, and the goal is to destroy eachother's tank.
 The game is written in Python using the Pygame framework and can run both locally or in a web browser through Webassembly.
