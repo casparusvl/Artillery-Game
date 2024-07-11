@@ -118,16 +118,15 @@ async def main():
             Menu.cursor_blink()
 
             # Select correct menu screen
-            if state.victory:
-                Menu.victory(screen, state.victory)
-            elif state.title_menu == True :
+            if state.title_menu == True :
                 Menu.title(screen)
             elif state.setup_menu == True :
                 Menu.setup(screen, p1, p2)
             elif state.pause == True:
                 Menu.pause(screen)
-            #elif state.end_menu == True :
-                # implement endscreen
+            elif state.victory:
+                Menu.victory(screen, state.victory)
+            
             else:
                 state.menu = False
                 
