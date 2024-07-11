@@ -104,8 +104,7 @@ async def main():
                     p1.gen_pos(world)
                     p2.gen_pos(world)
                     projectile.reset()
-                    #p1.hit = p2.hit = False
-                    Blast.reset()
+                    #Blast.reset()
                     state.init_new = False
                     if state.reset_score == True :
                         p1.score = p2.score = 0
@@ -165,6 +164,7 @@ async def main():
                     mouse_presses = pygame.mouse.get_pressed()
                     if mouse_presses[0]:
                         print(f"FIRE AWAY!\nVelocity X/Y: {mouse_pos},   Angle: {Player.active.cannon_angle}")
+                        Blast.reset()
                         projectile.launch(Player.active, mouse_pos)
 
             # Exit game on close windows button
@@ -353,7 +353,6 @@ class Player:
         self.set_name()
         self.score = 0
         self.set_sprite()
-        self.hit = False
         Player.list.append(self)
 
 
