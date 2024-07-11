@@ -351,12 +351,13 @@ class Player:
         self.set_color(color)
         self.set_name()
         self.score = 0
-        self.set_sprite()
+        self.set_sprites()
         Player.list.append(self)
 
 
     def __str__(self):
         return 'Player nr: {}\nName: {}\nPosition: {}\nColor: {}'.format(self.nr, self.name, self.pos, self.color)
+    
     
     def set_name(self, name=''):
         '''
@@ -364,6 +365,7 @@ class Player:
         '''
         self.name = str(name) if name else f"Player {self.nr}"
 
+    
     def gen_pos(self, world, hres=HRES):
         '''
         Put Player on the ground.
@@ -390,17 +392,6 @@ class Player:
         else:
             self.color = DEFAULT_COLOR[(self.nr-1) % len(DEFAULT_COLOR)]
 
-    
-    def set_cannon_angle(self, mouse_pos):
-        '''
-        Calculates the angle of the cannon sprite according to relative mouse position
-        '''
-        x_offset = mouse_pos[0] - self.pos[0]
-        if x_offset > 0:
-            self.cannon_angle = math.degrees(math.atan((self.pos[1] - mouse_pos[1]) / x_offset ))
-        elif x_offset < 0:
-            self.cannon_angle = 180 + math.degrees(math.atan((self.pos[1] - mouse_pos[1]) / x_offset))
-        
 
     def increase_score(self, amount=1) :
         '''
@@ -409,7 +400,7 @@ class Player:
         self.score = self.score + amount
 
 
-    def set_sprite(self):
+    def set_sprites(self):
         '''
         Sets player sprite, currently on of 3 built in tanks sprites
         '''
@@ -425,8 +416,19 @@ class Player:
             self.sprite = pygame.image.load("img/tank_pink.png").convert_alpha()
             self.cannon_sprite = pygame.image.load("img/cannon.png").convert_alpha()
             self.cannon_angle = 5
-        
 
+
+    def set_cannon_angle(self, mouse_pos):
+        '''
+        Calculates the angle of the cannon sprite according to relative mouse position
+        '''
+        x_offset = mouse_pos[0] - self.pos[0]
+        if x_offset > 0:
+            self.cannon_angle = math.degrees(math.atan((self.pos[1] - mouse_pos[1]) / x_offset ))
+        elif x_offset < 0:
+            self.cannon_angle = 180 + math.degrees(math.atan((self.pos[1] - mouse_pos[1]) / x_offset))
+
+        
 
 class Projectile:
     '''
@@ -1063,7 +1065,6 @@ def draw_cannon(player):
     elif player.nr == 2:
         screen.blit(cannon, (player.pos[0] - w, player.pos[1] - h - 13))
         screen.blit(player.sprite, (player.pos[0] - 28, player.pos[1] - 28))
-
 
 
 
