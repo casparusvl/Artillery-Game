@@ -104,7 +104,7 @@ async def main():
                     p1.gen_pos(world)
                     p2.gen_pos(world)
                     projectile.reset()
-                    projectile.hit = p1.hit = p2.hit = False
+                    #p1.hit = p2.hit = False
                     Blast.reset()
                     state.init_new = False
                     if state.reset_score == True :
@@ -189,12 +189,12 @@ async def main():
                     print(f"{p1.name} was hit!")
                     p2.increase_score()
                     state.turn = 0                 
-                    projectile.hit = p1.hit = True
+                    projectile.hit = True
                 if projectile.check_hit(p2.pos):
                     print(f"{p2.name} was hit!")
                     p1.increase_score()
                     state.turn = 1
-                    projectile.hit = p2.hit = True
+                    projectile.hit = True
                 
                 # Check victory condition
                 if p1.score >= 3:
@@ -211,10 +211,10 @@ async def main():
 
         if projectile.inflight == True :  
             # Draw faint projectile smoketrail
-            pygame.draw.aalines(screen, (25, 25, 25), False, projectile.trajectory[-70:])
+            pygame.draw.aalines(screen, (25, 25, 25), False, projectile.trajectory[-30:])
             # Draw bright yellow projectile
-            pygame.draw.aalines(screen, (255, 255, 0), False, projectile.trajectory[-10:])
-            pygame.draw.aalines(screen, (255, 255, 0), False, projectile.trajectory)
+            pygame.draw.aalines(screen, (255, 255, 0), False, projectile.trajectory[-3:])
+            # pygame.draw.aalines(screen, (255, 255, 0), False, projectile.interp_traj)
             # Alternate drawing of dot shaped projectile
             #pygame.draw.circle(screen, (255, 255, 0), projectile.trajectory[-1], radius=1)
         
@@ -459,17 +459,14 @@ class Projectile:
         '''
         Calculates velocity from relative mouse position and fires projectile
         '''
-        self.crater = []
+        self.reset()
         self.inflight = True
-        self.collision = False
-        self.hit = False
         
         self.pos = copy.copy(player.pos)
         self.pos[1] = self.pos[1] - 13 # Correction to center on tank sprite
         self.trajectory = [self.pos] # Start position in trajectory list
         self.interp_traj = [self.pos]
         
-        self.col_checked = 0
         self.velocity = [INPUT_SCALE * (mouse_pos[0] - player.pos[0]),
                          INPUT_SCALE * (mouse_pos[1] - player.pos[1])]
 
@@ -502,10 +499,10 @@ class Projectile:
         graph = []
         if self.velocity[0] >= 0:
             for i in range(int(points[0][0]) + 1, int(points[1][0]) + 1):
-                graph.append([i, const + slope * i, 2])
+                graph.append([i, const + slope * i])
         else:
             for i in range(int(points[0][0]), int(points[1][0]), -1):
-                graph.append([i, const + slope * i, 2])
+                graph.append([i, const + slope * i])
         #print(points)
         #print(slope)
         #print("Raak: ", graph)
