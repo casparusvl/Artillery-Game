@@ -1,10 +1,10 @@
-# Tank Duel CS50 final project
-#### Video Demo:  <URL HERE>
+# Artillery Game CS50 final project
+#### Video Demo:  https://www.youtube.com/watch?v=sEc4Xf--RkA
 #### Description:
 
-## Tank duel
+## Artillery Game
 
-This is a proof of concept for a game in the style of the classic Scorched Earth. Both players control a tank, placed on a randomly generated 2D landscape, and the goal is to destroy eachother's tank.
+This is a proof of concept for a game in the style of the classic Scorched Earth. Both players control a cannon, placed on opposite sides of a procedurally generated 2D landscape, and the goal is to destroy eachother's cannon.
 The game is written in Python using the Pygame framework and can run both locally or in a web browser through Webassembly.
 
 ### How to play:
@@ -15,8 +15,8 @@ Next is the setup screen. Both players will be able to input a Player name. If n
 During gameplay players can always pause the game and return to the setup screen by pressing 'p' or 'Escape'. From the pause menu it's possible to start a new game
 
 #### Gameplay:
-Player 1 will start the game. Use the mouse to aim and determine the velocity of the shot. the further from the cannon you click, the further the shot will reach. Try to hit the other player to score a point! Be carefull though: Don't hit yourself!
-After your shot, it will be the other players turn and so on, until a hit is scored. At this point the surviving Player will get a point and a new world will be generated, so that the game can continue.
+Player 1 will start the game. Use the mouse to aim and determine the velocity of the shot. the further from the cannon you click, the further the shot will reach. Try to hit the other player to score a point!
+After your shot, it will be the other player's turn and so on, until a hit is scored. Now the surviving player will get a point and a new world will be generated, so that the game can continue.
 First player to reach 3 kills wins the game!
 
 
@@ -27,13 +27,13 @@ Contains all Global gamestate variables as class variables.
 
 #### World class
 Contains the playing field.
-Generate will randomly generate a terrain, which works as follows:
+Generate will proceduraly generate a terrain, which works as follows:
 First create a numpy array with the horizontal resulution as size.
 take a nr (n = MINSAMPLES) of random samples evenly spaced out over the array (with some upper and lower bounds for the y values), and perform a linear interpolation to fill the array.
 double the nr of samples for a set number of iterations (n = ITERATIONS) and calculate a weighted average of the resulting arrays.
 The values of MINSAMPLES and ITERATIONS can be experimented with.
 I've settled on MINSAMPLES = 5, ITERATIONS = 4.
-MINSAMPLES = 3, ITERATIONS = 5 also givea a result i like.
+MINSAMPLES = 3, ITERATIONS = 5 also givea a good result.
 
 #### Player class
 This represents the player objects. Currently 2 players are supported, but this could be extended without much difficulty.
@@ -69,9 +69,9 @@ Draws the cannons on both player models, with the correct angle according to rel
 The actual angle of the cannon is stored in the player objects.
 
 #### Main function
-I've used the Pygbag module to compile the game to Webassembly so it can be run in a browser. To get this to work it was necessary to use asyncio.
+I've used the Pygbag module to compile the game to Webassembly so it can be run in a browser.
 Pygame.time.Clock.tick is use for the game clock.
-screen resolution is configurable. The game will run well in a wide range of resolutions, but the sprites and and animations won't scale as they are based on fixed pixel sizes.
+Screen resolution is configurable. The game will run well in a wide range of resolutions, but the sprites and and animations won't scale as they are based on fixed pixel sizes.
 TICKRATE determines the target framerate the game will run on. Projectile physics will be consistent independent of tickrate, but speed of explosion animations might change.
 If target framerate is not maintainable, game speed will slow down.
 
@@ -79,12 +79,10 @@ If target framerate is not maintainable, game speed will slow down.
 ### New feauture ideas
 
 #### Weapon types
-Rolling bomb, homing missile etc.
+Implement different weapon types, e.g. Rolling bomb, homing missile etc.
 
 #### Wind 
 Wind that effects the weapon trajectory. The challenge here is to make a nice visual representation, e.g. a moving flag or clouds.
 
 #### CPU controlled player AI
 It might be  be interesting to create a AI so the game can be played against the computer.
-
-
