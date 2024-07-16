@@ -691,9 +691,9 @@ class Menu:
                     state.title_menu = False
 
         pygame.Surface.fill(surface, (0, 0, 0))
-        textrect = draw_text(surface, 'Tank Duel', title_font, RED, (HRES // 2), (VRES // 4), x_side="center")
-        textrect = draw_text(surface, '(Click to start)', font_small, RED, (HRES // 2), (textrect.bottom + 5), x_side="center", y_side="top")
-        textrect = draw_text(surface, 'Kasper Vloon, 2023', font_small, DARKGREY, (HRES - 10), (VRES -10), x_side="right")
+        textrect = draw_text(surface, 'Artillery Game', title_font, RED, (HRES // 2), (VRES // 4), x_side="center")
+        textrect = draw_text(surface, '(Click to start)', font_small, GREY, (HRES // 2), (textrect.bottom + 15), x_side="center", y_side="top")
+        textrect = draw_text(surface, 'Kasper Vloon, 2024', font_small, DARKGREY, (HRES - 10), (VRES -10), x_side="right")
         pygame.display.flip()
 
     @classmethod
