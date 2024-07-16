@@ -64,6 +64,8 @@ font2 = pygame.font.Font('freesansbold.ttf', 32)
 font_fps = pygame.font.Font('freesansbold.ttf', 16)
 font_small = pygame.font.Font('freesansbold.ttf', 16)
 
+font3 = pygame.font.Font(None, 30)
+
 
 ###################################################################################
 
@@ -693,6 +695,17 @@ class Menu:
         pygame.Surface.fill(surface, (0, 0, 0))
         textrect = draw_text(surface, 'Artillery Game', title_font, RED, (HRES // 2), (VRES // 4), x_side="center")
         textrect = draw_text(surface, '(Click to start)', font_small, GREY, (HRES // 2), (textrect.bottom + 15), x_side="center", y_side="top")
+        
+        # For cs50 video
+        """
+        textrect = draw_text(surface, 'Casparus Vloon', font3, GREY, (HRES // 6), textrect.bottom + 150, y_side="top")
+        textrect = draw_text(surface, 'edX user: kasvl', font3, GREY, (HRES // 6), textrect.bottom + 8, y_side="top")
+        textrect = draw_text(surface, 'https://github.com/gaapjes/Artillery-Game', font3, GREY, (HRES // 6), textrect.bottom + 8, y_side="top")
+        textrect = draw_text(surface, 'Barcelona, Spain', font3, GREY, (HRES // 6), textrect.bottom + 8, y_side="top")
+        textrect = draw_text(surface, '16 july 2024', font3, GREY, (HRES // 6), textrect.bottom + 8, y_side="top")
+        """
+        ################
+
         textrect = draw_text(surface, 'Kasper Vloon, 2024', font_small, DARKGREY, (HRES - 10), (VRES -10), x_side="right")
         pygame.display.flip()
 
