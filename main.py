@@ -275,8 +275,7 @@ class GameState:
         self.init_new = True
         self.reset_score = False
         self.turn = 0
-        self.victory = None
-
+        self.victory = False
 
 
 
@@ -597,6 +596,7 @@ class Projectile:
             output.append(crater)
             break
         '''
+
 
 
 class Blast:
