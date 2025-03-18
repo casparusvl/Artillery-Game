@@ -288,7 +288,7 @@ class World:
         '''
         Create empty world object
         '''
-        ground = []
+        self.ground = []
         self.color = GROUND_COLOR
 
 
